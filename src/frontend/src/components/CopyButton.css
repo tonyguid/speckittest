@@ -1,0 +1,127 @@
+/* CopyButton.css */
+
+.copy-button-wrapper {
+  display: inline-block;
+  position: relative;
+}
+
+.copy-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #0078d4;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  min-width: 140px;
+  min-height: 44px;
+}
+
+.copy-button:hover:not(.disabled):not(.loading) {
+  background-color: #106ebe;
+  transform: translateY(-1px);
+}
+
+.copy-button:active:not(.disabled):not(.loading) {
+  background-color: #005a9e;
+  transform: translateY(0);
+}
+
+.copy-button:focus {
+  outline: 2px solid #0078d4;
+  outline-offset: 2px;
+}
+
+.copy-button.disabled,
+.copy-button.loading {
+  cursor: not-allowed;
+  opacity: 0.6;
+  background-color: #8ab4f8;
+}
+
+.copy-button.loading {
+  cursor: wait;
+}
+
+/* Spinner styles */
+.spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner-icon {
+  animation: spin 1s linear infinite;
+}
+
+.spinner-circle {
+  opacity: 0.25;
+}
+
+.spinner-path {
+  opacity: 0.75;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Button text */
+.button-text {
+  white-space: nowrap;
+}
+
+/* Tooltip support - uses native title attribute */
+.copy-button-wrapper[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 12px;
+  background-color: #333;
+  color: #fff;
+  font-size: 12px;
+  border-radius: 4px;
+  white-space: nowrap;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.copy-button-wrapper[title]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #333;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* Accessibility improvements */
+.copy-button[aria-busy="true"] {
+  position: relative;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .copy-button {
+    padding: 10px 20px;
+    font-size: 14px;
+    min-width: 120px;
+    min-height: 40px;
+  }
+}
