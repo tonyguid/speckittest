@@ -26,6 +26,7 @@ Principles
 - Determinism: tests must be deterministic and fast; flaky tests must be fixed or quarantined with a ticket linking root cause and owner.
 - Test naming and structure: tests should be organized and named to explain intent; use fixtures and mocks responsibly to keep tests focused.
 - Performance tests: add benchmarks for performance-critical paths and run them regularly in CI or nightly jobs.
+- Integration and E2E testing: Playwright is the default testing framework for integration and end-to-end testing across all projects. Playwright provides cross-browser support, reliable test execution, and comprehensive debugging capabilities. Use Playwright for browser-based testing; use xUnit or equivalent unit test frameworks for isolated component/service testing.
 
 4. User Experience Consistency
 - UI framework: all UI work must leverage React.js as the primary frontend framework for building user interfaces.
