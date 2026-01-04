@@ -15,8 +15,9 @@ Build a .NET 10 (C#) backend service with a React.js frontend that allows users 
 **Primary Dependencies**: 
   - Backend: Azure.Storage.Blobs, Azure.Identity, SignalR Core
   - Frontend: React, TypeScript, Axios, SignalR Client
+  - Testing: Playwright (integration/E2E), Vitest (unit tests)
 **Storage**: Azure Blob Storage (managed service, no local storage)
-**Testing**: xUnit (backend unit/integration tests), Vitest + React Testing Library (frontend tests)
+**Testing**: xUnit (backend unit/integration tests), Vitest (frontend unit tests), Playwright (frontend/API integration and E2E tests)
 **Target Platform**: Cloud-hosted (.NET backend on Azure App Service or Azure Functions, React SPA on Azure Static Web Apps)
 **Project Type**: Web (backend API + frontend SPA)
 **Performance Goals**: 
@@ -47,8 +48,10 @@ Build a .NET 10 (C#) backend service with a React.js frontend that allows users 
 
 ✅ **Testing Standards** (Principle 3):
 - Unit tests: ≥80% coverage target for core BlobCopyService and validation logic
-- Integration tests: Azure Blob Storage integration, API contract tests
-- UI tests: React component tests for forms, progress display, error messages
+- Unit test framework: xUnit (backend), Vitest (frontend) per language standards
+- Integration tests: Playwright for browser-based API integration testing, xUnit for backend service integration
+- E2E tests: Playwright with cross-browser support (Chrome, Firefox, Safari) per constitution requirement
+- UI tests: Playwright for user interaction flows; Vitest for isolated component logic
 - CI gating: All tests must pass before merge
 
 ✅ **User Experience Consistency** (Principle 4):
@@ -162,19 +165,28 @@ src/
 │   │   └── package.json
 │   │
 │   └── BlobCopy.UI.Tests/
-│       ├── components/
-│       │   ├── BlobCopyForm.test.tsx
-│       │   ├── ProgressDisplay.test.tsx
-│       │   └── ResultMessage.test.tsx
-│       └── services/
-│           ├── blobCopyApiService.test.ts
-│           └── uriValidationService.test.ts
-
-tests/
-├── contract/
-│   ├── api.contract.test.ts                     # API schema validation tests
-│   └── signalr.contract.test.ts                 # SignalR event schema validation
-└── e2e/
+│       ├── unit/
+│       │   ├── components/
+│       │   │   ├── BlobCopyForm.test.tsx        # Component logic unit tests (Vitest)
+│       │   │   ├── ProgressDisplay.test.tsx
+│       │   │   └── ResultMessage.test.tsx
+│       │   └── services/
+│       │       ├── blobCopyApiService.test.ts
+│       │       └── uriValidationService.test.ts
+│       └── e2e/
+│           ├── blob-copy-flow.spec.ts           # End-to-end user flow (Playwright)
+│           ├── error-handling.spec.ts           # Error scenarios (Playwright)
+│           └── accessibility.spec.ts            # WCAG AA accessibility (Playwright)
+│
+├── tests/
+│   ├── contract/
+│   │   ├── api.contract.test.ts                 # API schema validation tests (Playwright)
+│   │   └── signalr.contract.test.ts             # SignalR event schema validation
+│   ├── integration/
+│   │   ├── backend-integration.test.cs          # Backend service integration (xUnit)
+│   │   └── api-blob-storage.test.ts             # API to Blob Storage integration (Playwright)
+│   └── playwright.config.ts                     # Playwright configuration
+│       └── auth.setup.ts                        # Authentication setup for Playwright tests
     └── blob-copy-flow.e2e.test.ts               # End-to-end flow test
 ```
 
@@ -312,8 +324,10 @@ After Phase 1 design completion, run:
 This updates the AI agent context with:
 - Technology stack: C# .NET 10, React 18, Azure Blob Storage, SignalR
 - Architecture: REST API + WebSocket real-time updates
-- Testing framework: xUnit, Vitest, React Testing Library
+- Unit testing frameworks: xUnit (backend), Vitest (frontend)
+- Integration/E2E testing framework: Playwright with cross-browser support (Chrome, Firefox, Safari)
 - Key services: BlobCopyService, ProgressNotificationService, BlobValidationService
+- Test patterns: Playwright for browser automation, xUnit for service/backend integration
 
 ---
 
