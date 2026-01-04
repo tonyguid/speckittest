@@ -1,0 +1,117 @@
+.result-display {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border-radius: 8px;
+  border: 2px solid;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.result-display h2 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+}
+
+.result-success {
+  background-color: #d4edda;
+  border-color: #28a745;
+}
+
+.result-success h2 {
+  color: #155724;
+}
+
+.result-failure {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+}
+
+.result-failure h2 {
+  color: #721c24;
+}
+
+.result-cancelled {
+  background-color: #fff3cd;
+  border-color: #ffc107;
+}
+
+.result-cancelled h2 {
+  color: #856404;
+}
+
+.result-details {
+  line-height: 1.8;
+}
+
+.result-details p {
+  margin: 0.75rem 0;
+  font-size: 0.95rem;
+}
+
+.result-details strong {
+  display: inline-block;
+  min-width: 140px;
+  font-weight: 600;
+}
+
+.result-details code {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  word-break: break-all;
+  font-size: 0.9rem;
+}
+
+.error-list {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.error-list strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: inherit;
+}
+
+.error-list ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.error-list li {
+  margin-bottom: 0.75rem;
+  list-style-type: disc;
+}
+
+.error-message {
+  margin: 0.25rem 0;
+  font-weight: 500;
+  color: inherit;
+}
+
+.error-field {
+  margin: 0.25rem 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.result-success .error-list,
+.result-success .error-message,
+.result-success .error-field {
+  color: #155724;
+}
+
+.result-failure .error-list,
+.result-failure .error-message,
+.result-failure .error-field {
+  color: #721c24;
+}
+
+.result-cancelled .error-list,
+.result-cancelled .error-message,
+.result-cancelled .error-field {
+  color: #856404;
+}

@@ -1,0 +1,40 @@
+// Program.cs configuration snippet for SignalR setup
+// This demonstrates how to register and configure the BlobCopyHub in a .NET 10 application
+
+/*
+/// Add to Program.cs (after other service registrations)
+
+// SignalR configuration
+builder.Services.AddSignalR(hubOptions =>
+{
+    hubOptions.MaximumReceiveMessageSize = 32 * 1024; // 32 KB max message size
+    hubOptions.StreamBufferCapacity = 10; // Buffer up to 10 streams
+    hubOptions.ClientTimeoutInterval = TimeSpan.FromSeconds(30); // 30 second timeout
+    hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(15); // Send keepalive every 15 seconds
+})
+.AddJsonProtocol(options =>
+{
+    options.PayloadSerializerOptions.PropertyNamingPolicy = null;
+});
+
+// ... after app.Build()
+
+// Configure CORS for SignalR
+app.UseCors(policy => policy
+    .AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+);
+
+// Map SignalR hub to endpoint
+app.MapHub<BlobCopyHub>("/signalr/blob-copy-hub");
+
+// Optional: Map health check endpoint
+app.MapGet("/health", () => new { status = "healthy", timestamp = DateTime.UtcNow });
+
+app.Run();
+
+*/
+
+// NOTE: This file is for documentation purposes.
+// The actual Program.cs should be created by the user based on this template.
