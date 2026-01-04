@@ -1,0 +1,127 @@
+Purpose
+
+This document defines the guiding principles for the Speckit project focused on code quality, testing standards, user experience consistency, performance requirements, and governance. It is intended to guide technical decisions and implementation choices across the codebase.
+
+Principles
+
+1. Code Quality
+- Clarity first: prioritize readable, self-documenting code over clever shortcuts.
+- Single responsibility: functions, classes, and modules have one responsibility and clear boundaries.
+- Consistent style: follow the repository's style guide and automated linters (formatting and static analysis must pass in CI).
+- Small, reversible changes: prefer incremental PRs that are easy to review and revert.
+- Documentation: public APIs, complex algorithms, and non-obvious design choices must include concise docs and examples.
+- Code reviews: every change must be reviewed by at least one other engineer; critical areas require two reviewers.
+- Automated code review: GitHub Copilot automated code review must be enabled for all pull requests to provide initial feedback on code quality, security, and best practices before human review.
+
+2. Technology Stack
+- Backend framework: all backend work must be implemented using .NET 10, written in C#.
+- AI workloads: for AI-related workloads and machine learning tasks, Python is the preferred language.
+- Frontend framework: all UI work must leverage React.js (see User Experience Consistency section for details).
+- Consistency: ensure technology choices align with team expertise, Azure service integrations, and long-term maintainability.
+
+3. Testing Standards
+- Test pyramid: heavy unit tests, moderate integration tests, and targeted end-to-end (E2E) tests.
+- Coverage goals: aim for ≥80% unit coverage for core modules; lower coverage may be acceptable for non-critical tooling, but must be justified.
+- Automated CI gating: all PRs must run tests; failures block merges unless an exception is approved.
+- Determinism: tests must be deterministic and fast; flaky tests must be fixed or quarantined with a ticket linking root cause and owner.
+- Test naming and structure: tests should be organized and named to explain intent; use fixtures and mocks responsibly to keep tests focused.
+- Performance tests: add benchmarks for performance-critical paths and run them regularly in CI or nightly jobs.
+
+4. User Experience Consistency
+- UI framework: all UI work must leverage React.js as the primary frontend framework for building user interfaces.
+- Design system: adopt and maintain a shared component library and design tokens for spacing, color, typography, and motion.
+- Accessibility (A11y): follow WCAG AA baseline; accessibility checks must be part of PR review for UI changes.
+- Predictability: behaviors and interaction patterns must be consistent across features (keyboard, focus, error handling, loading states).
+- Error messaging: user-facing errors must be actionable, localized, and safe (no sensitive details exposed).
+- Internationalization: design flows with localization in mind; avoid hard-coded strings.
+- Documentation: UX decisions that affect behavior must be documented in the design/README and referenced in PRs.
+
+5. Performance Requirements
+- Budgets: set measurable budgets for key metrics (e.g., Time to Interactive, API p95 latency, memory footprint) for major product surfaces.
+- API latency SLA: API responses must complete within 200 ms for 95% of requests (p95 latency ≤ 200 ms). Measure and monitor this metric in Application Insights; alert on breaches.
+- Baselines and alerts: establish baselines and alert thresholds; monitor in production and review regressions in CI.
+- Efficient defaults: prefer algorithms and data structures appropriate to scale; avoid premature optimization, but optimize when metrics indicate need.
+- Lazy & incremental loading: use code-splitting, pagination, streaming, and caching where appropriate to reduce perceived latency.
+- Resource usage: be mindful of memory and CPU; prefer streaming and backpressure for large workloads.
+
+6. Observability
+- Azure Application Insights: all services and applications must integrate Azure Application Insights for observability, monitoring, and logging.
+- Instrumentation: use distributed tracing, custom events, and metrics to track request flows, errors, and performance across services.
+- Alerting: configure alerts for critical issues (error rates, latency p95+ anomalies, service health) and route to on-call teams.
+- Dashboards: maintain dashboards for key services showing health, performance, and operational metrics.
+
+7. API Design
+- REST principles: APIs must follow REST conventions with proper HTTP methods (GET, POST, PUT, DELETE, PATCH), status codes, and stateless semantics.
+- Resource-oriented design: endpoints represent resources (nouns) with operations (verbs via HTTP methods), not RPC-style action endpoints.
+- Versioning: use URL path versioning (e.g., `/api/v1/resource`) or content negotiation for API versions; communicate deprecation timelines.
+- Documentation: all public APIs must include OpenAPI/Swagger specs, clear error responses, rate limits, and authentication requirements.
+- Consistency: follow a standardized response envelope for errors, pagination, and metadata across all APIs.
+- API Management: all APIs must be managed through Azure API Management for centralized governance, throttling, security, and monitoring.
+
+8. Infrastructure & Cloud Platform
+- Cloud provider: all infrastructure, services, and deployments must use Azure as the primary cloud platform.
+- Infrastructure as Code (IaC): all infrastructure must be defined, versioned, and deployed using Infrastructure-as-Code (Bicep or Terraform). IaC definitions must live in source control, be peer-reviewed, and be deployed via CI/CD pipelines; manual changes to production resources are prohibited except via a documented emergency process.
+- Service tiers: prefer managed Azure services (App Service, Azure SQL Database, Azure Cosmos DB, Azure Functions) over raw VMs where cost-effective and appropriate.
+- Compliance and security: leverage Azure security features (managed identity, Key Vault, network security groups) and comply with relevant compliance standards for data residency and encryption.
+
+9. Resiliency
+- High availability: design services with redundancy across availability zones; use load balancing and auto-scaling to handle traffic spikes and failures.
+- Graceful degradation: services must degrade gracefully under load or failure, maintaining core functionality while reducing non-critical features.
+- Circuit breakers & retries: implement circuit breakers for external service calls and use exponential backoff for retries to prevent cascading failures.
+- Fault isolation: isolate failures to minimize blast radius; use timeouts, bulkheads, and service boundaries to prevent one failure from taking down the system.
+- Disaster recovery: maintain RTO (Recovery Time Objective) and RPO (Recovery Point Objective) targets; test failover and recovery procedures regularly.
+- Monitoring and alerting: implement comprehensive monitoring with alert escalation for anomalies, errors, and SLA violations.
+- Chaos engineering: periodically conduct chaos tests to validate system resilience under adverse conditions and identify weaknesses.
+
+10. Application Security
+- Authentication: all applications must use Azure Entra ID (formerly Azure AD) for authentication and authorization.
+- Identity management: leverage Entra ID for managing user identities, roles, and access control across services.
+- Token-based security: use JWT tokens issued by Entra ID for API authentication; validate tokens on every request.
+- Conditional access: enforce conditional access policies through Entra ID for risk-based authentication.
+- Audit and compliance: log all authentication and authorization events in Application Insights and maintain audit trails for compliance.
+- Secret management: never hard-code credentials; use Azure Key Vault integrated with Entra ID managed identity for secure secret storage and retrieval.
+
+Governance: How Principles Guide Decisions
+
+1. Decision Model
+- RFCs for non-trivial changes: proposals that affect architecture, UX patterns, or cross-cutting concerns require an RFC detailing motivation, alternatives, migration plan, rollout, and rollback strategy.
+- Ownership: designate owners for core areas (architecture, data storage, UX, security, CI). Owners approve exceptions and oversee long-term health.
+- Review board: for high-risk or strategic changes, gather a small cross-functional panel (owner + 2 senior engineers) to evaluate and approve.
+
+2. Implementation Guidance
+- Choose simplicity: prefer straightforward solutions that meet requirements over speculative complexity.
+- Tooling alignment: adopt and configure linters, formatters, CI checks, test runners, and monitoring agents uniformly across repositories.
+- Azure integration: all applications must be configured to report to Application Insights for centralized observability.
+- Backwards compatibility: changes to public APIs must follow semantic versioning and include migration guides.
+- Incremental rollout: use feature flags and staged rollouts for risky features; collect metrics and rollback on regression.
+
+3. Exceptions & Trade-offs
+- Documented exceptions: any deviation from these principles must be documented in the PR and approved by the area owner.
+- Time-boxed: exceptions should include a sunset plan with a target date for remediation.
+
+4. Enforcement & Feedback Loops
+- CI & automation: enforce static analysis, tests, and basic performance checks in CI.
+- Metrics-driven reviews: production metrics and test results inform retrospectives and identify technical debt.
+- Regular audits: schedule periodic architecture and dependency reviews to ensure continued alignment with the constitution.
+
+5. Onboarding & Evolution
+- New engineers: provide a concise onboarding checklist linking to this constitution, the style guide, component library, and CI setup.
+- Living document: treat this constitution as versioned and reviewable; major updates follow the RFC process.
+
+Quick Implementation Checklist (to include in PR template)
+- Does this change follow the code style and lint rules? (Y/N)
+- Are unit/integration tests added or updated and passing? (Y/N)
+- Does this change introduce UX changes requiring design review? (Y/N)
+- Are performance implications considered and measured? (Y/N)
+- Is there an owner and/or RFC for architecture-impacting work? (Y/N)
+- Any exception documented and approved? (If yes, link to approval)
+
+Contact & Ownership
+- For questions about enforcement or exceptions, contact the designated area owners documented in the repo README.
+
+Revision History
+- v1.0 — Initial adoption (date)
+
+---
+
+This constitution is intentionally concise. For any specific rule, see the linked team style guides, component library docs, CI configuration, and RFCs for amplification.
