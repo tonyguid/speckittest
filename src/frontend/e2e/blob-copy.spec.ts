@@ -1,11 +1,12 @@
-import { test, expect, Browser, BrowserContext, Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
+import type { Page, BrowserContext } from '@playwright/test';
 
 // Configure test to run on Chrome, Firefox, and Safari
 test.describe.parallel('Blob Copy E2E Tests', () => {
   let page: Page;
 
-  test.beforeEach(async ({ browser, context }) => {
-    page = await context.newPage();
+  test.beforeEach(async ({ page: testPage }: { page: Page }) => {
+    page = testPage;
     // Navigate to the application
     await page.goto('http://localhost:3000');
   });
@@ -122,8 +123,8 @@ test.describe.parallel('Blob Copy E2E Tests', () => {
       await page.waitForTimeout(1000);
 
       // Stop if completed
-      const resultDisplay = page.queryByTestId('result-display');
-      if (resultDisplay) {
+      const resultDisplay = page.locator('[data-testid="result-display"]');
+      if (await resultDisplay.isVisible().catch(() => false)) {
         break;
       }
     }
@@ -185,8 +186,8 @@ test.describe.parallel('Blob Copy E2E Tests', () => {
     await expect(errors).toBeVisible({ timeout: 5000 });
 
     // Or show failure result
-    const resultDisplay = page.queryByTestId('result-display');
-    if (resultDisplay) {
+    const resultDisplay = page.locator('[data-testid="result-display"]');
+    if (await resultDisplay.isVisible().catch(() => false)) {
       await expect(resultDisplay).toContainText('❌ Copy Failed');
       const errorList = page.getByTestId('error-list');
       await expect(errorList).toBeVisible();
@@ -210,7 +211,8 @@ test.describe.parallel('Blob Copy E2E Tests', () => {
   });
 
   // Scenario 7: Browser Compatibility
-  test('should work across browsers', async ({ browserName }) => {
+  test('should work across browsers', async ({ page: testPage, browserName }: { page: Page; browserName: string }) => {
+    page = testPage;
     // This test runs on all configured browsers (Chrome, Firefox, Safari)
     console.log(`Running on: ${browserName}`);
 
@@ -254,12 +256,14 @@ test.describe.parallel('Blob Copy E2E Tests', () => {
 
     // Should be able to start a new operation
     // (Form should be available again or reset button should appear)
+    const newSourceInput = page.getByTestId('source-uri-input');
+    await expect(newSourceInput).toBeVisible();
   });
 
   // Edge case: Network Error Handling
-  test('should handle network errors gracefully', async () => {
+  test('should handle network errors gracefully', async ({ context }: { context: BrowserContext }) => {
     // Simulate network error by disconnecting
-    await page.context().setOffline(true);
+    await context.setOffline(true);
 
     const sourceInput = page.getByTestId('source-uri-input');
     const destInput = page.getByTestId('destination-uri-input');
@@ -268,7 +272,7 @@ test.describe.parallel('Blob Copy E2E Tests', () => {
     await destInput.fill('https://account.blob.core.windows.net/dest/blob');
 
     // Wait to reconnect
-    await page.context().setOffline(false);
+    await context.setOffline(false);
 
     const startButton = page.getByTestId('start-copy-button');
     await startButton.click();
