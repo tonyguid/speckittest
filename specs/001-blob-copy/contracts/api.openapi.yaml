@@ -1,0 +1,440 @@
+openapi: 3.0.0
+info:
+  title: Blob Copy API
+  description: REST API for copying blobs between Azure Blob Storage containers with real-time progress tracking
+  version: 1.0.0
+  contact:
+    name: Development Team
+    email: dev@example.com
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:5000/api/v1
+    description: Local development server
+  - url: https://blob-copy-api.example.com/api/v1
+    description: Production server
+
+paths:
+  /blob-copy/validate:
+    post:
+      summary: Validate blob URIs
+      description: Validates source and destination blob URIs for format, existence, and permissions
+      operationId: validateUris
+      tags:
+        - Blob Copy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidateRequest'
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateResponse'
+        '400':
+          description: Malformed request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized (missing or invalid token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Azure Storage unreachable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
+
+  /blob-copy/start:
+    post:
+      summary: Start blob copy operation
+      description: Initiates an asynchronous blob copy operation and returns immediately with operation ID
+      operationId: startCopy
+      tags:
+        - Blob Copy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CopyRequest'
+      responses:
+        '202':
+          description: Copy operation started (Accepted)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlobCopyOperation'
+          headers:
+            Location:
+              schema:
+                type: string
+              description: URL to get operation status
+        '400':
+          description: Validation failed or request malformed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized (missing or invalid token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Destination blob already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
+
+  /blob-copy/{id}/status:
+    get:
+      summary: Get copy operation status
+      description: Returns current state of a blob copy operation by ID
+      operationId: getStatus
+      tags:
+        - Blob Copy
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Operation ID
+      responses:
+        '200':
+          description: Operation status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlobCopyOperation'
+        '401':
+          description: Unauthorized (missing or invalid token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Operation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
+
+  /blob-copy/{id}/cancel:
+    post:
+      summary: Cancel copy operation
+      description: Requests cancellation of an in-progress blob copy operation
+      operationId: cancelCopy
+      tags:
+        - Blob Copy
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Operation ID
+      responses:
+        '200':
+          description: Operation cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlobCopyOperation'
+        '401':
+          description: Unauthorized (missing or invalid token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Operation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Operation cannot be cancelled (already completed or failed)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - bearerAuth: []
+
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Returns service health status
+      operationId: getHealth
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  schemas:
+    ValidateRequest:
+      type: object
+      required:
+        - sourceUri
+        - destinationUri
+      properties:
+        sourceUri:
+          type: string
+          format: uri
+          example: https://account.blob.core.windows.net/source/blob.vhd
+          description: Source blob URI
+        destinationUri:
+          type: string
+          format: uri
+          example: https://account.blob.core.windows.net/dest/blob-copy.vhd
+          description: Destination blob URI
+
+    ValidateResponse:
+      type: object
+      required:
+        - valid
+      properties:
+        valid:
+          type: boolean
+          description: Whether URIs are valid
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          description: List of validation errors (empty if valid=true)
+
+    ValidationError:
+      type: object
+      required:
+        - field
+        - message
+        - code
+      properties:
+        field:
+          type: string
+          example: sourceUri
+          description: Field that failed validation
+        message:
+          type: string
+          example: Source URI is required
+          description: User-friendly error message
+        code:
+          type: string
+          enum:
+            - INVALID_URI_FORMAT
+            - SOURCE_NOT_FOUND
+            - INSUFFICIENT_PERMISSIONS
+            - IDENTICAL_URIS
+            - CONTAINER_NOT_FOUND
+            - DESTINATION_EXISTS
+          description: Error code for programmatic handling
+
+    CopyRequest:
+      type: object
+      required:
+        - sourceUri
+        - destinationUri
+      properties:
+        sourceUri:
+          type: string
+          format: uri
+          example: https://account.blob.core.windows.net/source/blob.vhd
+          description: Source blob URI
+        destinationUri:
+          type: string
+          format: uri
+          example: https://account.blob.core.windows.net/dest/blob-copy.vhd
+          description: Destination blob URI
+
+    BlobCopyOperation:
+      type: object
+      required:
+        - id
+        - sourceUri
+        - destinationUri
+        - status
+        - createdAt
+        - correlationId
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+          description: Unique operation ID
+        sourceUri:
+          type: string
+          format: uri
+          description: Source blob URI
+        destinationUri:
+          type: string
+          format: uri
+          description: Destination blob URI
+        status:
+          type: string
+          enum:
+            - Pending
+            - InProgress
+            - Completed
+            - Failed
+            - Cancelled
+          description: Current operation status
+        progressPercentage:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+          example: 45.5
+          description: Copy progress percentage (0-100)
+        bytesTransferred:
+          type: integer
+          format: int64
+          example: 52428800
+          description: Number of bytes transferred so far
+        totalBytes:
+          type: integer
+          format: int64
+          example: 1073741824
+          description: Total bytes to transfer
+        estimatedTimeRemaining:
+          type: integer
+          format: int32
+          example: 3600
+          description: Estimated seconds remaining
+        transferRateMbps:
+          type: number
+          format: double
+          example: 12.5
+          description: Current transfer rate in MB/s
+        startedAt:
+          type: string
+          format: date-time
+          description: Operation start time (ISO 8601)
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Operation completion time (ISO 8601)
+        correlationId:
+          type: string
+          format: uuid
+          description: Correlation ID for tracing
+        errorMessage:
+          type: string
+          nullable: true
+          description: Error message if status is Failed
+        errorCode:
+          type: string
+          nullable: true
+          enum:
+            - BLOB_NOT_FOUND
+            - INSUFFICIENT_PERMISSIONS
+            - INVALID_URI
+            - TIMEOUT
+            - SERVICE_ERROR
+          description: Error code if status is Failed
+        initiatedBy:
+          type: string
+          nullable: true
+          description: User or service that initiated the copy
+        cancellationRequested:
+          type: boolean
+          default: false
+          description: Whether cancellation has been requested
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error message
+        correlationId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Correlation ID for tracing
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          nullable: true
+          description: Additional error details
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - unhealthy
+          description: Service health status
+        timestamp:
+          type: string
+          format: date-time
+          description: Health check timestamp
+        checks:
+          type: object
+          additionalProperties:
+            type: string
+          description: Individual component health statuses
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer token (JWT) from Microsoft Entra ID
+
+tags:
+  - name: Blob Copy
+    description: Blob copy operations
+  - name: Health
+    description: Health check endpoint
