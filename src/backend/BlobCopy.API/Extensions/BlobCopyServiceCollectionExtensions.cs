@@ -30,6 +30,11 @@ public static class BlobCopyServiceCollectionExtensions
         // Scoped: Each operation gets a new instance for isolated progress tracking
         services.AddScoped<ProgressNotificationService>();
 
+        // Register TelemetryService for Application Insights integration
+        // Singleton: Stateless service for tracking events and metrics
+        services.AddSingleton<TelemetryService>();
+
         return services;
+    }
     }
 }

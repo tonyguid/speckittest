@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { BlobCopyOperation, BlobCopyStatus } from '../types';
 import { apiClient } from './apiClient';
 import { signalRClient, SignalRCallbacks } from './signalRClient';
+import { appInsightsService } from '../services/applicationInsightsService';
 
 /**
  * Hook for managing a blob copy operation lifecycle.
@@ -35,6 +36,14 @@ export function useCopyOperation() {
 
         setOperation(op);
 
+        // Track telemetry event
+        appInsightsService.trackCopyOperationStarted(
+          op.id,
+          sourceUri,
+          destinationUri,
+          op.totalBytes
+        );
+
         // Setup real-time updates via SignalR if requested
         if (useWebSocket) {
           try {
@@ -50,21 +59,34 @@ export function useCopyOperation() {
                         }
                       : null
                   );
+                  appInsightsService.trackProgressUpdate(progress);
                 },
                 onCopyCompleted: (completedOp) => {
                   setOperation(completedOp);
+                  const durationSeconds = op.startedAt
+                    ? (new Date(completedOp.completedAt || '').getTime() - new Date(op.startedAt).getTime()) / 1000
+                    : 0;
+                  appInsightsService.trackCopyOperationCompleted(completedOp, durationSeconds);
                 },
                 onCopyFailed: (failedOp) => {
                   setOperation(failedOp);
-                  setError(
-                    failedOp.errors?.[0]?.message || 'Copy operation failed'
-                  );
+                  const errorMsg = failedOp.errors?.[0]?.message || 'Copy operation failed';
+                  setError(errorMsg);
+                  const durationSeconds = op.startedAt
+                    ? (new Date(failedOp.completedAt || '').getTime() - new Date(op.startedAt).getTime()) / 1000
+                    : 0;
+                  appInsightsService.trackCopyOperationFailed(failedOp, errorMsg, durationSeconds);
                 },
                 onOperationCancelled: (cancelledOp) => {
                   setOperation(cancelledOp);
+                  const durationSeconds = op.startedAt
+                    ? (new Date(cancelledOp.completedAt || '').getTime() - new Date(op.startedAt).getTime()) / 1000
+                    : 0;
+                  appInsightsService.trackCopyOperationCancelled(cancelledOp, durationSeconds);
                 },
                 onConnectionError: (err) => {
                   console.warn('SignalR error, falling back to polling:', err);
+                  appInsightsService.trackException(err);
                   // Fall back to polling
                   startPolling(op.id);
                 },
@@ -75,6 +97,7 @@ export function useCopyOperation() {
             signalRSubscribedRef.current = op.id;
           } catch (err) {
             console.warn('Failed to connect WebSocket, using polling:', err);
+            appInsightsService.trackException(err instanceof Error ? err : new Error(String(err)));
             // Fall back to polling
             startPolling(op.id);
           }
