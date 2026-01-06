@@ -43,6 +43,9 @@ if (!string.IsNullOrWhiteSpace(instrumentationKey))
 // Add SignalR for real-time updates
 builder.Services.AddBlobCopySignalR();
 
+// Add blob copy business services (validation, copy, progress notification)
+builder.Services.AddBlobCopyServices();
+
 // Add Azure Storage services
 if (environment.IsDevelopment())
 {
