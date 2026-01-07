@@ -1,4 +1,4 @@
-import { BlobCopyOperation, BlobCopyStatus } from '../types';
+import { BlobCopyOperation, BlobCopyStatus } from '../types.js';
 import { useProgress } from '../hooks/useProgress';
 import './ProgressDisplay.css';
 

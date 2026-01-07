@@ -287,7 +287,7 @@ test.describe.parallel('Blob Copy E2E Tests', () => {
   test('should meet WCAG AA accessibility standards', async () => {
     // Verify form is accessible
     const form = page.getByTestId('copy-form');
-    await expect(form).toHaveAccessibleName();
+    await expect(form).toHaveAccessibleName(/copy/i);
 
     // Check for proper labels
     const sourceInput = page.getByTestId('source-uri-input');

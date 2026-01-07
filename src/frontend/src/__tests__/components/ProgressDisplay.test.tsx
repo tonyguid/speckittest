@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ProgressDisplay } from '../../components/ProgressDisplay';
-import { BlobCopyStatus } from '../../types';
+import { BlobCopyStatus, BlobCopyOperation } from '../../types';
 
 describe('ProgressDisplay', () => {
   beforeEach(() => {
@@ -19,15 +19,17 @@ describe('ProgressDisplay', () => {
   });
 
   it('should not render when operation is completed', () => {
-    const operation = {
+    const operation: BlobCopyOperation = {
       id: 'op-123',
       sourceUri: 'https://source',
       destinationUri: 'https://dest',
       status: BlobCopyStatus.Completed,
-      bytesCopied: 1000,
+      progressPercentage: 100,
+      bytesTransferred: 1000,
       totalBytes: 1000,
-      createdAt: new Date().toISOString(),
+      startedAt: new Date().toISOString(),
       completedAt: new Date().toISOString(),
+      correlationId: 'corr-123',
     };
 
     const { container } = render(
@@ -40,14 +42,16 @@ describe('ProgressDisplay', () => {
   });
 
   it('should render when operation is pending', () => {
-    const operation = {
+    const operation: BlobCopyOperation = {
       id: 'op-123',
       sourceUri: 'https://source',
       destinationUri: 'https://dest',
       status: BlobCopyStatus.Pending,
-      bytesCopied: 0,
+      progressPercentage: 0,
+      bytesTransferred: 0,
       totalBytes: 1000,
-      createdAt: new Date().toISOString(),
+      startedAt: new Date().toISOString(),
+      correlationId: 'corr-123',
     };
 
     render(<ProgressDisplay operation={operation} />);
@@ -59,14 +63,16 @@ describe('ProgressDisplay', () => {
   });
 
   it('should render when operation is running', () => {
-    const operation = {
+    const operation: BlobCopyOperation = {
       id: 'op-123',
       sourceUri: 'https://source',
       destinationUri: 'https://dest',
       status: BlobCopyStatus.Running,
-      bytesCopied: 500,
+      progressPercentage: 50,
+      bytesTransferred: 500,
       totalBytes: 1000,
-      createdAt: new Date().toISOString(),
+      startedAt: new Date().toISOString(),
+      correlationId: 'corr-123',
     };
 
     render(<ProgressDisplay operation={operation} />);
@@ -78,14 +84,16 @@ describe('ProgressDisplay', () => {
   });
 
   it('should display operation ID', () => {
-    const operation = {
+    const operation: BlobCopyOperation = {
       id: 'op-123',
       sourceUri: 'https://source',
       destinationUri: 'https://dest',
       status: BlobCopyStatus.Running,
-      bytesCopied: 500,
+      progressPercentage: 50,
+      bytesTransferred: 500,
       totalBytes: 1000,
-      createdAt: new Date().toISOString(),
+      startedAt: new Date().toISOString(),
+      correlationId: 'corr-123',
     };
 
     render(<ProgressDisplay operation={operation} />);
@@ -94,14 +102,16 @@ describe('ProgressDisplay', () => {
   });
 
   it('should display progress percentage', () => {
-    const operation = {
+    const operation: BlobCopyOperation = {
       id: 'op-123',
       sourceUri: 'https://source',
       destinationUri: 'https://dest',
       status: BlobCopyStatus.Running,
-      bytesCopied: 500,
+      progressPercentage: 50,
+      bytesTransferred: 500,
       totalBytes: 1000,
-      createdAt: new Date().toISOString(),
+      startedAt: new Date().toISOString(),
+      correlationId: 'corr-123',
     };
 
     render(<ProgressDisplay operation={operation} />);
@@ -110,14 +120,16 @@ describe('ProgressDisplay', () => {
   });
 
   it('should display bytes transferred', () => {
-    const operation = {
+    const operation: BlobCopyOperation = {
       id: 'op-123',
       sourceUri: 'https://source',
       destinationUri: 'https://dest',
       status: BlobCopyStatus.Running,
-      bytesCopied: 1073741824, // 1 GB
+      progressPercentage: 50,
+      bytesTransferred: 1073741824, // 1 GB
       totalBytes: 2147483648, // 2 GB
-      createdAt: new Date().toISOString(),
+      startedAt: new Date().toISOString(),
+      correlationId: 'corr-123',
     };
 
     render(<ProgressDisplay operation={operation} />);
@@ -128,14 +140,16 @@ describe('ProgressDisplay', () => {
   });
 
   it('should display transfer rate for running operation', () => {
-    const operation = {
+    const operation: BlobCopyOperation = {
       id: 'op-123',
       sourceUri: 'https://source',
       destinationUri: 'https://dest',
       status: BlobCopyStatus.Running,
-      bytesCopied: 10485760, // 10 MB
+      progressPercentage: 10,
+      bytesTransferred: 10485760, // 10 MB
       totalBytes: 104857600, // 100 MB
-      createdAt: new Date().toISOString(),
+      startedAt: new Date().toISOString(),
+      correlationId: 'corr-123',
     };
 
     const startTime = Date.now() - 5000; // 5 seconds ago
@@ -152,14 +166,16 @@ describe('ProgressDisplay', () => {
   });
 
   it('should display time remaining for running operation', () => {
-    const operation = {
+    const operation: BlobCopyOperation = {
       id: 'op-123',
       sourceUri: 'https://source',
       destinationUri: 'https://dest',
       status: BlobCopyStatus.Running,
-      bytesCopied: 52428800, // 50 MB
+      progressPercentage: 50,
+      bytesTransferred: 52428800, // 50 MB
       totalBytes: 104857600, // 100 MB
-      createdAt: new Date().toISOString(),
+      startedAt: new Date().toISOString(),
+      correlationId: 'corr-123',
     };
 
     const startTime = Date.now() - 5000; // 5 seconds ago
@@ -178,14 +194,16 @@ describe('ProgressDisplay', () => {
   });
 
   it('should show indeterminate progress when total size is unknown', () => {
-    const operation = {
+    const operation: BlobCopyOperation = {
       id: 'op-123',
       sourceUri: 'https://source',
       destinationUri: 'https://dest',
       status: BlobCopyStatus.Running,
-      bytesCopied: 1024,
+      progressPercentage: 0,
+      bytesTransferred: 1024,
       totalBytes: 0,
-      createdAt: new Date().toISOString(),
+      startedAt: new Date().toISOString(),
+      correlationId: 'corr-123',
     };
 
     render(<ProgressDisplay operation={operation} />);
@@ -196,14 +214,16 @@ describe('ProgressDisplay', () => {
   });
 
   it('should render cancel button when running', () => {
-    const operation = {
+    const operation: BlobCopyOperation = {
       id: 'op-123',
       sourceUri: 'https://source',
       destinationUri: 'https://dest',
       status: BlobCopyStatus.Running,
-      bytesCopied: 500,
+      progressPercentage: 50,
+      bytesTransferred: 500,
       totalBytes: 1000,
-      createdAt: new Date().toISOString(),
+      startedAt: new Date().toISOString(),
+      correlationId: 'corr-123',
     };
 
     const mockOnCancel = vi.fn();
@@ -221,14 +241,16 @@ describe('ProgressDisplay', () => {
   });
 
   it('should disable cancel button while cancelling', () => {
-    const operation = {
+    const operation: BlobCopyOperation = {
       id: 'op-123',
       sourceUri: 'https://source',
       destinationUri: 'https://dest',
       status: BlobCopyStatus.Running,
-      bytesCopied: 500,
+      progressPercentage: 50,
+      bytesTransferred: 500,
       totalBytes: 1000,
-      createdAt: new Date().toISOString(),
+      startedAt: new Date().toISOString(),
+      correlationId: 'corr-123',
     };
 
     const mockOnCancel = vi.fn();
@@ -247,14 +269,16 @@ describe('ProgressDisplay', () => {
   });
 
   it('should not render cancel button when pending', () => {
-    const operation = {
+    const operation: BlobCopyOperation = {
       id: 'op-123',
       sourceUri: 'https://source',
       destinationUri: 'https://dest',
       status: BlobCopyStatus.Pending,
-      bytesCopied: 0,
+      progressPercentage: 0,
+      bytesTransferred: 0,
       totalBytes: 1000,
-      createdAt: new Date().toISOString(),
+      startedAt: new Date().toISOString(),
+      correlationId: 'corr-123',
     };
 
     const { container } = render(
@@ -267,14 +291,16 @@ describe('ProgressDisplay', () => {
   });
 
   it('should render progress bar', () => {
-    const operation = {
+    const operation: BlobCopyOperation = {
       id: 'op-123',
       sourceUri: 'https://source',
       destinationUri: 'https://dest',
       status: BlobCopyStatus.Running,
-      bytesCopied: 500,
+      progressPercentage: 50,
+      bytesTransferred: 500,
       totalBytes: 1000,
-      createdAt: new Date().toISOString(),
+      startedAt: new Date().toISOString(),
+      correlationId: 'corr-123',
     };
 
     render(<ProgressDisplay operation={operation} />);

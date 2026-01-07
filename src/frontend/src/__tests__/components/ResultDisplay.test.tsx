@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ResultDisplay } from '../../components/ResultDisplay';
-import { BlobCopyStatus } from '../../types';
+import { BlobCopyStatus, BlobCopyOperation } from '../../types';
 
 describe('ResultDisplay', () => {
   beforeEach(() => {
@@ -19,14 +19,16 @@ describe('ResultDisplay', () => {
   });
 
   it('should not render when operation is pending', () => {
-    const operation = {
+    const operation: BlobCopyOperation = {
       id: 'op-123',
       sourceUri: 'https://source',
       destinationUri: 'https://dest',
       status: BlobCopyStatus.Pending,
-      bytesCopied: 0,
+      progressPercentage: 0,
+      bytesTransferred: 0,
       totalBytes: 1000,
-      createdAt: new Date().toISOString(),
+      startedAt: new Date().toISOString(),
+      correlationId: 'corr-123',
     };
 
     const { container } = render(
@@ -39,14 +41,16 @@ describe('ResultDisplay', () => {
   });
 
   it('should not render when operation is running', () => {
-    const operation = {
+    const operation: BlobCopyOperation = {
       id: 'op-123',
       sourceUri: 'https://source',
       destinationUri: 'https://dest',
       status: BlobCopyStatus.Running,
-      bytesCopied: 500,
+      progressPercentage: 50,
+      bytesTransferred: 500,
       totalBytes: 1000,
-      createdAt: new Date().toISOString(),
+      startedAt: new Date().toISOString(),
+      correlationId: 'corr-123',
     };
 
     const { container } = render(
@@ -60,15 +64,17 @@ describe('ResultDisplay', () => {
 
   describe('success result', () => {
     it('should display success message', () => {
-      const operation = {
+      const operation: BlobCopyOperation = {
         id: 'op-123',
         sourceUri: 'https://source',
         destinationUri: 'https://dest',
         status: BlobCopyStatus.Completed,
-        bytesCopied: 1000,
+        progressPercentage: 100,
+        bytesTransferred: 1000,
         totalBytes: 1000,
-        createdAt: new Date().toISOString(),
+        startedAt: new Date().toISOString(),
         completedAt: new Date().toISOString(),
+        correlationId: 'corr-123',
       };
 
       render(<ResultDisplay operation={operation} />);
@@ -79,15 +85,17 @@ describe('ResultDisplay', () => {
     });
 
     it('should display source and destination URIs', () => {
-      const operation = {
+      const operation: BlobCopyOperation = {
         id: 'op-123',
         sourceUri: 'https://source/blob',
         destinationUri: 'https://dest/blob',
         status: BlobCopyStatus.Completed,
-        bytesCopied: 1000,
+        progressPercentage: 100,
+        bytesTransferred: 1000,
         totalBytes: 1000,
-        createdAt: new Date().toISOString(),
+        startedAt: new Date().toISOString(),
         completedAt: new Date().toISOString(),
+        correlationId: 'corr-123',
       };
 
       render(<ResultDisplay operation={operation} />);
@@ -97,15 +105,17 @@ describe('ResultDisplay', () => {
     });
 
     it('should display bytes copied and total size', () => {
-      const operation = {
+      const operation: BlobCopyOperation = {
         id: 'op-123',
         sourceUri: 'https://source',
         destinationUri: 'https://dest',
         status: BlobCopyStatus.Completed,
-        bytesCopied: 1073741824, // 1 GB
+        progressPercentage: 100,
+        bytesTransferred: 1073741824, // 1 GB
         totalBytes: 1073741824, // 1 GB
-        createdAt: new Date().toISOString(),
+        startedAt: new Date().toISOString(),
         completedAt: new Date().toISOString(),
+        correlationId: 'corr-123',
       };
 
       render(<ResultDisplay operation={operation} />);
@@ -115,15 +125,17 @@ describe('ResultDisplay', () => {
     });
 
     it('should display completion duration', () => {
-      const operation = {
+      const operation: BlobCopyOperation = {
         id: 'op-123',
         sourceUri: 'https://source',
         destinationUri: 'https://dest',
         status: BlobCopyStatus.Completed,
-        bytesCopied: 1000,
+        progressPercentage: 100,
+        bytesTransferred: 1000,
         totalBytes: 1000,
-        createdAt: new Date().toISOString(),
+        startedAt: new Date().toISOString(),
         completedAt: new Date().toISOString(),
+        correlationId: 'corr-123',
       };
 
       render(<ResultDisplay operation={operation} durationSeconds={120} />);
@@ -133,15 +145,17 @@ describe('ResultDisplay', () => {
 
     it('should display completion timestamp', () => {
       const now = new Date();
-      const operation = {
+      const operation: BlobCopyOperation = {
         id: 'op-123',
         sourceUri: 'https://source',
         destinationUri: 'https://dest',
         status: BlobCopyStatus.Completed,
-        bytesCopied: 1000,
+        progressPercentage: 100,
+        bytesTransferred: 1000,
         totalBytes: 1000,
-        createdAt: new Date().toISOString(),
+        startedAt: new Date().toISOString(),
         completedAt: now.toISOString(),
+        correlationId: 'corr-123',
       };
 
       render(<ResultDisplay operation={operation} />);
@@ -152,21 +166,18 @@ describe('ResultDisplay', () => {
 
   describe('failure result', () => {
     it('should display failure message', () => {
-      const operation = {
+      const operation: BlobCopyOperation = {
         id: 'op-123',
         sourceUri: 'https://source',
         destinationUri: 'https://dest',
         status: BlobCopyStatus.Failed,
-        bytesCopied: 500,
+        progressPercentage: 50,
+        bytesTransferred: 500,
         totalBytes: 1000,
-        createdAt: new Date().toISOString(),
+        startedAt: new Date().toISOString(),
         completedAt: new Date().toISOString(),
-        errors: [
-          {
-            field: 'sourceUri',
-            message: 'Source blob not found',
-          },
-        ],
+        correlationId: 'corr-123',
+        errorMessage: 'Source blob not found',
       };
 
       render(<ResultDisplay operation={operation} />);
@@ -175,25 +186,18 @@ describe('ResultDisplay', () => {
     });
 
     it('should display error list', () => {
-      const operation = {
+      const operation: BlobCopyOperation = {
         id: 'op-123',
         sourceUri: 'https://source',
         destinationUri: 'https://dest',
         status: BlobCopyStatus.Failed,
-        bytesCopied: 500,
+        progressPercentage: 50,
+        bytesTransferred: 500,
         totalBytes: 1000,
-        createdAt: new Date().toISOString(),
+        startedAt: new Date().toISOString(),
         completedAt: new Date().toISOString(),
-        errors: [
-          {
-            field: 'sourceUri',
-            message: 'Source blob not found',
-          },
-          {
-            field: 'permissions',
-            message: 'Access denied to source container',
-          },
-        ],
+        correlationId: 'corr-123',
+        errorMessage: 'Source blob not found. Access denied to source container.',
       };
 
       render(<ResultDisplay operation={operation} />);
@@ -207,21 +211,18 @@ describe('ResultDisplay', () => {
     });
 
     it('should display URIs and duration before failure', () => {
-      const operation = {
+      const operation: BlobCopyOperation = {
         id: 'op-123',
         sourceUri: 'https://source/blob',
         destinationUri: 'https://dest/blob',
         status: BlobCopyStatus.Failed,
-        bytesCopied: 500,
+        progressPercentage: 50,
+        bytesTransferred: 500,
         totalBytes: 1000,
-        createdAt: new Date().toISOString(),
+        startedAt: new Date().toISOString(),
         completedAt: new Date().toISOString(),
-        errors: [
-          {
-            field: 'sourceUri',
-            message: 'Source blob not found',
-          },
-        ],
+        correlationId: 'corr-123',
+        errorMessage: 'Source blob not found',
       };
 
       render(<ResultDisplay operation={operation} durationSeconds={30} />);
@@ -234,15 +235,17 @@ describe('ResultDisplay', () => {
 
   describe('cancelled result', () => {
     it('should display cancellation message', () => {
-      const operation = {
+      const operation: BlobCopyOperation = {
         id: 'op-123',
         sourceUri: 'https://source',
         destinationUri: 'https://dest',
         status: BlobCopyStatus.Cancelled,
-        bytesCopied: 500,
+        progressPercentage: 50,
+        bytesTransferred: 500,
         totalBytes: 1000,
-        createdAt: new Date().toISOString(),
+        startedAt: new Date().toISOString(),
         completedAt: new Date().toISOString(),
+        correlationId: 'corr-123',
       };
 
       render(<ResultDisplay operation={operation} />);
@@ -251,15 +254,17 @@ describe('ResultDisplay', () => {
     });
 
     it('should display bytes copied before cancellation', () => {
-      const operation = {
+      const operation: BlobCopyOperation = {
         id: 'op-123',
         sourceUri: 'https://source',
         destinationUri: 'https://dest',
         status: BlobCopyStatus.Cancelled,
-        bytesCopied: 536870912, // 512 MB
+        progressPercentage: 50,
+        bytesTransferred: 536870912, // 512 MB
         totalBytes: 1073741824, // 1 GB
-        createdAt: new Date().toISOString(),
+        startedAt: new Date().toISOString(),
         completedAt: new Date().toISOString(),
+        correlationId: 'corr-123',
       };
 
       render(<ResultDisplay operation={operation} />);
@@ -270,15 +275,17 @@ describe('ResultDisplay', () => {
     });
 
     it('should display cancellation timestamp and duration', () => {
-      const operation = {
+      const operation: BlobCopyOperation = {
         id: 'op-123',
         sourceUri: 'https://source',
         destinationUri: 'https://dest',
         status: BlobCopyStatus.Cancelled,
-        bytesCopied: 500,
+        progressPercentage: 50,
+        bytesTransferred: 500,
         totalBytes: 1000,
-        createdAt: new Date().toISOString(),
+        startedAt: new Date().toISOString(),
         completedAt: new Date().toISOString(),
+        correlationId: 'corr-123',
       };
 
       render(<ResultDisplay operation={operation} durationSeconds={45} />);
@@ -290,15 +297,17 @@ describe('ResultDisplay', () => {
 
   describe('byte formatting', () => {
     it('should format large file sizes correctly', () => {
-      const operation = {
+      const operation: BlobCopyOperation = {
         id: 'op-123',
         sourceUri: 'https://source',
         destinationUri: 'https://dest',
         status: BlobCopyStatus.Completed,
-        bytesCopied: 1099511627776, // 1 TB
+        progressPercentage: 100,
+        bytesTransferred: 1099511627776, // 1 TB
         totalBytes: 1099511627776,
-        createdAt: new Date().toISOString(),
+        startedAt: new Date().toISOString(),
         completedAt: new Date().toISOString(),
+        correlationId: 'corr-123',
       };
 
       render(<ResultDisplay operation={operation} />);
@@ -309,15 +318,17 @@ describe('ResultDisplay', () => {
 
   describe('duration formatting', () => {
     it('should format duration as HH:MM:SS', () => {
-      const operation = {
+      const operation: BlobCopyOperation = {
         id: 'op-123',
         sourceUri: 'https://source',
         destinationUri: 'https://dest',
         status: BlobCopyStatus.Completed,
-        bytesCopied: 1000,
+        progressPercentage: 100,
+        bytesTransferred: 1000,
         totalBytes: 1000,
-        createdAt: new Date().toISOString(),
+        startedAt: new Date().toISOString(),
         completedAt: new Date().toISOString(),
+        correlationId: 'corr-123',
       };
 
       render(<ResultDisplay operation={operation} durationSeconds={3665} />);
@@ -328,15 +339,17 @@ describe('ResultDisplay', () => {
 
   describe('result styling', () => {
     it('should apply success class', () => {
-      const operation = {
+      const operation: BlobCopyOperation = {
         id: 'op-123',
         sourceUri: 'https://source',
         destinationUri: 'https://dest',
         status: BlobCopyStatus.Completed,
-        bytesCopied: 1000,
+        progressPercentage: 100,
+        bytesTransferred: 1000,
         totalBytes: 1000,
-        createdAt: new Date().toISOString(),
+        startedAt: new Date().toISOString(),
         completedAt: new Date().toISOString(),
+        correlationId: 'corr-123',
       };
 
       render(<ResultDisplay operation={operation} />);
@@ -346,16 +359,17 @@ describe('ResultDisplay', () => {
     });
 
     it('should apply failure class', () => {
-      const operation = {
+      const operation: BlobCopyOperation = {
         id: 'op-123',
         sourceUri: 'https://source',
         destinationUri: 'https://dest',
         status: BlobCopyStatus.Failed,
-        bytesCopied: 500,
+        progressPercentage: 50,
+        bytesTransferred: 500,
         totalBytes: 1000,
-        createdAt: new Date().toISOString(),
+        startedAt: new Date().toISOString(),
         completedAt: new Date().toISOString(),
-        errors: [],
+        correlationId: 'corr-123',
       };
 
       render(<ResultDisplay operation={operation} />);
@@ -365,15 +379,17 @@ describe('ResultDisplay', () => {
     });
 
     it('should apply cancelled class', () => {
-      const operation = {
+      const operation: BlobCopyOperation = {
         id: 'op-123',
         sourceUri: 'https://source',
         destinationUri: 'https://dest',
         status: BlobCopyStatus.Cancelled,
-        bytesCopied: 500,
+        progressPercentage: 50,
+        bytesTransferred: 500,
         totalBytes: 1000,
-        createdAt: new Date().toISOString(),
+        startedAt: new Date().toISOString(),
         completedAt: new Date().toISOString(),
+        correlationId: 'corr-123',
       };
 
       render(<ResultDisplay operation={operation} />);

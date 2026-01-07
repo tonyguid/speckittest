@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { CopyButton } from '../../components/CopyButton';
 
 describe('CopyButton', () => {
-  let mockOnClick: ReturnType<typeof vi.fn>;
+  let mockOnClick: () => void;
 
   beforeEach(() => {
     mockOnClick = vi.fn();
