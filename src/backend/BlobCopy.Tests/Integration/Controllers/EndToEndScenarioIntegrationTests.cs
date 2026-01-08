@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
+using Microsoft.Extensions.Logging;
 
 namespace BlobCopy.Tests.Integration.Controllers;
 
@@ -79,10 +80,10 @@ public class EndToEndScenarioIntegrationTests
             .Returns(new BlobCopyOperation
             {
                 Id = actualOperationId,
-                Status = BlobCopyStatus.Running,
+                Status = BlobCopyStatus.InProgress,
                 SourceUri = sourceUri,
                 DestinationUri = destUri,
-                BytesCopied = 1024 * 1024 * 100,
+                BytesTransferred = 1024 * 1024 * 100,
                 TotalBytes = 1024 * 1024 * 500,
                 StartedAt = DateTime.UtcNow.AddSeconds(-60)
             });
@@ -91,8 +92,8 @@ public class EndToEndScenarioIntegrationTests
         var statusOkResult = Assert.IsType<OkObjectResult>(statusResult);
         var statusOp = Assert.IsType<BlobCopyOperation>(statusOkResult.Value);
 
-        Assert.Equal(BlobCopyStatus.Running, statusOp.Status);
-        Assert.True(statusOp.BytesCopied > 0);
+        Assert.Equal(BlobCopyStatus.InProgress, statusOp.Status);
+        Assert.True(statusOp.BytesTransferred > 0);
     }
 
     [Fact]
@@ -142,7 +143,7 @@ public class EndToEndScenarioIntegrationTests
             DestinationUri = destUri,
             StartedAt = DateTime.UtcNow,
             TotalBytes = totalBytes,
-            BytesCopied = 0
+            BytesTransferred = 0
         };
 
         _mockCopyService
@@ -159,12 +160,12 @@ public class EndToEndScenarioIntegrationTests
         var runningOp = new BlobCopyOperation
         {
             Id = operationId,
-            Status = BlobCopyStatus.Running,
+            Status = BlobCopyStatus.InProgress,
             SourceUri = sourceUri,
             DestinationUri = destUri,
             StartedAt = DateTime.UtcNow.AddSeconds(-60),
             TotalBytes = totalBytes,
-            BytesCopied = totalBytes / 2
+            BytesTransferred = totalBytes / 2
         };
 
         _mockCopyService
@@ -174,7 +175,7 @@ public class EndToEndScenarioIntegrationTests
         var status2 = _controller.GetStatus(operationId);
         var result2 = Assert.IsType<OkObjectResult>(status2);
         var op2 = Assert.IsType<BlobCopyOperation>(result2.Value);
-        Assert.Equal(BlobCopyStatus.Running, op2.Status);
+        Assert.Equal(BlobCopyStatus.InProgress, op2.Status);
 
         // Complete
         var completedOp = new BlobCopyOperation
@@ -186,7 +187,7 @@ public class EndToEndScenarioIntegrationTests
             StartedAt = DateTime.UtcNow.AddSeconds(-120),
             CompletedAt = DateTime.UtcNow,
             TotalBytes = totalBytes,
-            BytesCopied = totalBytes,
+            BytesTransferred = totalBytes,
             DurationSeconds = 120
         };
 
@@ -198,7 +199,7 @@ public class EndToEndScenarioIntegrationTests
         var result3 = Assert.IsType<OkObjectResult>(status3);
         var op3 = Assert.IsType<BlobCopyOperation>(result3.Value);
         Assert.Equal(BlobCopyStatus.Completed, op3.Status);
-        Assert.Equal(totalBytes, op3.BytesCopied);
+        Assert.Equal(totalBytes, op3.BytesTransferred);
     }
 
     [Fact]
@@ -215,10 +216,10 @@ public class EndToEndScenarioIntegrationTests
             .Returns(new BlobCopyOperation
             {
                 Id = operationId,
-                Status = BlobCopyStatus.Running,
+                Status = BlobCopyStatus.InProgress,
                 SourceUri = sourceUri,
                 DestinationUri = destUri,
-                BytesCopied = totalBytes / 3,
+                BytesTransferred = totalBytes / 3,
                 TotalBytes = totalBytes
             });
 
@@ -226,7 +227,7 @@ public class EndToEndScenarioIntegrationTests
         var statusResult = _controller.GetStatus(operationId);
         var statusOk = Assert.IsType<OkObjectResult>(statusResult);
         var runningOp = Assert.IsType<BlobCopyOperation>(statusOk.Value);
-        Assert.Equal(BlobCopyStatus.Running, runningOp.Status);
+        Assert.Equal(BlobCopyStatus.InProgress, runningOp.Status);
 
         // Cancel
         var cancelledOp = new BlobCopyOperation
@@ -235,7 +236,7 @@ public class EndToEndScenarioIntegrationTests
             Status = BlobCopyStatus.Cancelled,
             SourceUri = sourceUri,
             DestinationUri = destUri,
-            BytesCopied = totalBytes / 3,
+            BytesTransferred = totalBytes / 3,
             TotalBytes = totalBytes,
             CompletedAt = DateTime.UtcNow
         };
@@ -250,7 +251,7 @@ public class EndToEndScenarioIntegrationTests
         Assert.Equal(BlobCopyStatus.Cancelled, finalOp.Status);
 
         // Verify progress was preserved
-        Assert.Equal(totalBytes / 3, finalOp.BytesCopied);
+        Assert.Equal(totalBytes / 3, finalOp.BytesTransferred);
     }
 
     [Fact]
@@ -296,20 +297,20 @@ public class EndToEndScenarioIntegrationTests
         var op1 = new BlobCopyOperation
         {
             Id = op1Id,
-            Status = BlobCopyStatus.Running,
+            Status = BlobCopyStatus.InProgress,
             SourceUri = "https://storage.blob.core.windows.net/source/file1.vhd",
             DestinationUri = "https://storage.blob.core.windows.net/dest/file1.vhd",
-            BytesCopied = 1024 * 1024 * 50,
+            BytesTransferred = 1024 * 1024 * 50,
             TotalBytes = 1024 * 1024 * 100
         };
 
         var op2 = new BlobCopyOperation
         {
             Id = op2Id,
-            Status = BlobCopyStatus.Running,
+            Status = BlobCopyStatus.InProgress,
             SourceUri = "https://storage.blob.core.windows.net/source/file2.vhd",
             DestinationUri = "https://storage.blob.core.windows.net/dest/file2.vhd",
-            BytesCopied = 1024 * 1024 * 75,
+            BytesTransferred = 1024 * 1024 * 75,
             TotalBytes = 1024 * 1024 * 150
         };
 
@@ -333,7 +334,7 @@ public class EndToEndScenarioIntegrationTests
 
         Assert.Equal(op1Id, returnedOp1.Id);
         Assert.Equal(op2Id, returnedOp2.Id);
-        Assert.NotEqual(returnedOp1.BytesCopied, returnedOp2.BytesCopied);
+        Assert.NotEqual(returnedOp1.BytesTransferred, returnedOp2.BytesTransferred);
     }
 
     [Fact]

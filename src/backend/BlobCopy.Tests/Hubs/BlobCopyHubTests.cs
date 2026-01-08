@@ -3,6 +3,7 @@ using Moq;
 using Microsoft.AspNetCore.SignalR;
 using BlobCopy.API.Hubs;
 using BlobCopy.API.Models;
+using Microsoft.Extensions.Logging;
 
 namespace BlobCopy.Tests.Hubs;
 
@@ -10,7 +11,7 @@ namespace BlobCopy.Tests.Hubs;
 /// Unit tests for BlobCopyHub SignalR hub.
 /// Tests hub lifecycle, client subscriptions, and message broadcasting.
 /// </summary>
-public class BlobCopyHubTests
+public class BlobCopyHubTests : IDisposable
 {
     private readonly Mock<ILogger<BlobCopyHub>> _mockLogger;
     private readonly Mock<IHubCallerClients<IBlobCopyClient>> _mockClients;
@@ -47,6 +48,20 @@ public class BlobCopyHubTests
         hub.Groups = _mockGroupManager.Object;
         
         return hub;
+    }
+
+    public void Dispose()
+    {
+        // Reset static state in the hub by creating an instance and clearing connections
+        var hub = CreateHub();
+        // Access the private static field via reflection to reset it
+        var hubType = typeof(BlobCopyHub);
+        var connectionsField = hubType.GetField("_operationConnections", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+        if (connectionsField != null)
+        {
+            var connections = connectionsField.GetValue(null) as System.Collections.IDictionary;
+            connections?.Clear();
+        }
     }
 
     [Fact]
@@ -158,11 +173,11 @@ public class BlobCopyHubTests
             ProgressPercentage = 50m
         };
 
-        var mockGroupClients = new Mock<IClientProxy>();
+        var mockGroupClients = new Mock<IBlobCopyClient>();
         _mockClients.Setup(c => c.Group($"operation-{operationId}")).Returns(mockGroupClients.Object);
 
         mockGroupClients
-            .Setup(g => g.SendCoreAsync("ProgressUpdate", It.IsAny<object?[]>(), It.IsAny<CancellationToken>()))
+            .Setup(g => g.ProgressUpdate(It.IsAny<ProgressUpdate>()))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -178,12 +193,12 @@ public class BlobCopyHubTests
         // Arrange
         var hub = CreateHub();
         var operationId = "op-completed";
-        var mockGroupClients = new Mock<IClientProxy>();
+        var mockGroupClients = new Mock<IBlobCopyClient>();
         
         _mockClients.Setup(c => c.Group($"operation-{operationId}")).Returns(mockGroupClients.Object);
 
         mockGroupClients
-            .Setup(g => g.SendCoreAsync("CopyCompleted", It.IsAny<object?[]>(), It.IsAny<CancellationToken>()))
+            .Setup(g => g.CopyCompleted(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<long>(), It.IsAny<int>(), It.IsAny<DateTime>()))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -205,12 +220,12 @@ public class BlobCopyHubTests
         // Arrange
         var hub = CreateHub();
         var operationId = "op-failed";
-        var mockGroupClients = new Mock<IClientProxy>();
+        var mockGroupClients = new Mock<IBlobCopyClient>();
         
         _mockClients.Setup(c => c.Group($"operation-{operationId}")).Returns(mockGroupClients.Object);
 
         mockGroupClients
-            .Setup(g => g.SendCoreAsync("CopyFailed", It.IsAny<object?[]>(), It.IsAny<CancellationToken>()))
+            .Setup(g => g.CopyFailed(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<DateTime>()))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -232,12 +247,12 @@ public class BlobCopyHubTests
         // Arrange
         var hub = CreateHub();
         var operationId = "op-cancelled";
-        var mockGroupClients = new Mock<IClientProxy>();
+        var mockGroupClients = new Mock<IBlobCopyClient>();
         
         _mockClients.Setup(c => c.Group($"operation-{operationId}")).Returns(mockGroupClients.Object);
 
         mockGroupClients
-            .Setup(g => g.SendCoreAsync("OperationCancelled", It.IsAny<object?[]>(), It.IsAny<CancellationToken>()))
+            .Setup(g => g.OperationCancelled(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<DateTime>(), It.IsAny<string>()))
             .Returns(Task.CompletedTask);
 
         // Act

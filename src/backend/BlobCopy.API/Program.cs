@@ -2,6 +2,7 @@ using System.Reflection;
 using Azure.Identity;
 using BlobCopy.API.Extensions;
 using BlobCopy.API.Hubs;
+using BlobCopy.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 

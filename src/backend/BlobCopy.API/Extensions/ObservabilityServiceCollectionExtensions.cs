@@ -1,4 +1,5 @@
 using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.ApplicationInsights.AspNetCore.Extensions;
 
 namespace BlobCopy.API.Extensions;
 
@@ -28,13 +29,6 @@ public static class ObservabilityServiceCollectionExtensions
                 options.InstrumentationKey = instrumentationKey;
             }
         });
-
-        // Configure telemetry to include request/response bodies for debugging
-        services.ConfigureTelemetryModule<RequestTrackingTelemetryModule>(
-            (module, _) =>
-            {
-                module.IncludeHeaders = true;
-            });
 
         return services;
     }

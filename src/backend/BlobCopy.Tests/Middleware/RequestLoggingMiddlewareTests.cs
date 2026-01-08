@@ -1,6 +1,8 @@
 using Xunit;
 using Moq;
 using BlobCopy.API.Middleware;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
 
 namespace BlobCopy.Tests.Middleware;
 

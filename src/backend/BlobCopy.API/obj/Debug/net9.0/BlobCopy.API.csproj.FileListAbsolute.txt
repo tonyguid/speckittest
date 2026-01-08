@@ -1,0 +1,9 @@
+C:\Projects\QCells\speckittest\my-project\src\backend\BlobCopy.API\obj\Debug\net9.0\BlobCopy.API.csproj.AssemblyReference.cache
+C:\Projects\QCells\speckittest\my-project\src\backend\BlobCopy.API\obj\Debug\net9.0\rpswa.dswa.cache.json
+C:\Projects\QCells\speckittest\my-project\src\backend\BlobCopy.API\obj\Debug\net9.0\BlobCopy.API.GeneratedMSBuildEditorConfig.editorconfig
+C:\Projects\QCells\speckittest\my-project\src\backend\BlobCopy.API\obj\Debug\net9.0\BlobCopy.API.AssemblyInfoInputs.cache
+C:\Projects\QCells\speckittest\my-project\src\backend\BlobCopy.API\obj\Debug\net9.0\BlobCopy.API.AssemblyInfo.cs
+C:\Projects\QCells\speckittest\my-project\src\backend\BlobCopy.API\obj\Debug\net9.0\BlobCopy.API.csproj.CoreCompileInputs.cache
+C:\Projects\QCells\speckittest\my-project\src\backend\BlobCopy.API\obj\Debug\net9.0\BlobCopy.API.MvcApplicationPartsAssemblyInfo.cs
+C:\Projects\QCells\speckittest\my-project\src\backend\BlobCopy.API\obj\Debug\net9.0\BlobCopy.API.MvcApplicationPartsAssemblyInfo.cache
+C:\Projects\QCells\speckittest\my-project\src\backend\BlobCopy.API\obj\Debug\net9.0\BlobCopy.API.sourcelink.json

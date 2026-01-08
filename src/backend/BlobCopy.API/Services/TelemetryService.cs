@@ -61,8 +61,8 @@ public class TelemetryService
         {
             { "BytesTransferred", update.BytesTransferred },
             { "TotalBytes", update.TotalBytes },
-            { "ProgressPercentage", update.ProgressPercentage },
-            { "TransferRateMbps", update.TransferRateMbps ?? 0 },
+            { "ProgressPercentage", (double)update.ProgressPercentage },
+            { "TransferRateMbps", (double)update.TransferRateMbps },
             { "EstimatedSecondsRemaining", update.EstimatedSecondsRemaining ?? 0 }
         };
 
@@ -84,10 +84,10 @@ public class TelemetryService
 
         var metrics = new Dictionary<string, double>
         {
-            { "BytesCopied", operation.BytesCopied ?? 0 },
+            { "BytesTransferred", operation.BytesTransferred },
             { "TotalBytes", operation.TotalBytes },
             { "DurationSeconds", duration.TotalSeconds },
-            { "ThroughputMbps", CalculateThroughput(operation.BytesCopied ?? 0, duration) }
+            { "ThroughputMbps", CalculateThroughput(operation.BytesTransferred, duration) }
         };
 
         _telemetryClient.TrackEvent("BlobCopyCompleted", properties, metrics);
@@ -115,7 +115,7 @@ public class TelemetryService
 
         var metrics = new Dictionary<string, double>
         {
-            { "BytesCopied", operation.BytesCopied ?? 0 },
+            { "BytesTransferred", operation.BytesTransferred },
             { "TotalBytes", operation.TotalBytes },
             { "DurationSeconds", duration.TotalSeconds }
         };
@@ -144,16 +144,16 @@ public class TelemetryService
 
         var metrics = new Dictionary<string, double>
         {
-            { "BytesCopied", operation.BytesCopied ?? 0 },
+            { "BytesTransferred", operation.BytesTransferred },
             { "TotalBytes", operation.TotalBytes },
             { "DurationSeconds", duration.TotalSeconds }
         };
 
         _telemetryClient.TrackEvent("BlobCopyCancelled", properties, metrics);
         _logger.LogWarning(
-            "Blob copy operation cancelled: {OperationId}, Bytes copied: {BytesCopied}, Duration: {Duration}ms",
+            "Blob copy operation cancelled: {OperationId}, Bytes transferred: {BytesTransferred}, Duration: {Duration}ms",
             operation.Id,
-            operation.BytesCopied,
+            operation.BytesTransferred,
             duration.TotalMilliseconds
         );
     }
@@ -203,7 +203,7 @@ public class TelemetryService
     /// </summary>
     public void TrackMetric(string metricName, double value, Dictionary<string, string>? properties = null)
     {
-        _telemetryClient.GetMetricManager().Publish(metricName, value);
+        _telemetryClient.TrackMetric(metricName, value, properties);
         _logger.LogDebug("Metric tracked: {MetricName} = {Value}", metricName, value);
     }
 

@@ -2,20 +2,35 @@ using BlobCopy.API.Models;
 using BlobCopy.API.Services;
 using Moq;
 using Xunit;
+using Microsoft.Extensions.Logging;
 
 namespace BlobCopy.Tests.Unit.Services;
 
 public class BlobCopyServiceTests
 {
     private readonly Mock<Azure.Storage.Blobs.BlobServiceClient> _mockBlobServiceClient;
+    private readonly Mock<IBlobClientFactory> _mockBlobClientFactory;
     private readonly Mock<ILogger<BlobCopyService>> _mockLogger;
     private readonly BlobCopyService _service;
 
     public BlobCopyServiceTests()
     {
         _mockBlobServiceClient = new Mock<Azure.Storage.Blobs.BlobServiceClient>();
+        _mockBlobClientFactory = new Mock<IBlobClientFactory>();
         _mockLogger = new Mock<ILogger<BlobCopyService>>();
-        _service = new BlobCopyService(_mockBlobServiceClient.Object, _mockLogger.Object);
+        
+        // Setup factory to return mock BlobClient that doesn't throw
+        var mockBlobClient = new Mock<Azure.Storage.Blobs.BlobClient>();
+        var mockResponse = Azure.Response.FromValue(
+            Azure.Storage.Blobs.Models.BlobsModelFactory.BlobProperties(contentLength: 1024),
+            Mock.Of<Azure.Response>());
+        mockBlobClient.Setup(x => x.GetPropertiesAsync(default, default))
+            .ReturnsAsync(mockResponse);
+        
+        _mockBlobClientFactory.Setup(x => x.CreateBlobClient(It.IsAny<string>()))
+            .Returns(mockBlobClient.Object);
+            
+        _service = new BlobCopyService(_mockBlobServiceClient.Object, _mockBlobClientFactory.Object, _mockLogger.Object);
     }
 
     // Constructor tests
@@ -23,7 +38,7 @@ public class BlobCopyServiceTests
     public void Constructor_ThrowsArgumentNullException_WhenBlobServiceClientIsNull()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            new BlobCopyService(null, _mockLogger.Object)
+            new BlobCopyService(null, _mockBlobClientFactory.Object, _mockLogger.Object)
         );
     }
 
@@ -31,14 +46,14 @@ public class BlobCopyServiceTests
     public void Constructor_ThrowsArgumentNullException_WhenLoggerIsNull()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            new BlobCopyService(_mockBlobServiceClient.Object, null)
+            new BlobCopyService(_mockBlobServiceClient.Object, _mockBlobClientFactory.Object, null)
         );
     }
 
     [Fact]
     public void Constructor_CreatesInstance_WhenPropertiesValid()
     {
-        var service = new BlobCopyService(_mockBlobServiceClient.Object, _mockLogger.Object);
+        var service = new BlobCopyService(_mockBlobServiceClient.Object, _mockBlobClientFactory.Object, _mockLogger.Object);
         Assert.NotNull(service);
     }
 
@@ -112,7 +127,7 @@ public class BlobCopyServiceTests
         Assert.Equal(destUri, operation.DestinationUri);
         Assert.Equal(BlobCopyStatus.Pending, operation.Status);
         Assert.NotNull(operation.StartedAt);
-        Assert.Equal(0, operation.BytesCopied);
+        Assert.Equal(0, operation.BytesTransferred);
         Assert.NotNull(operation.Errors);
     }
 
@@ -148,6 +163,15 @@ public class BlobCopyServiceTests
     [Fact]
     public async Task StartCopyAsync_HandlesErrors_WhenSourceBlobDoesNotExist()
     {
+        // Setup factory to return mock BlobClient that throws 404
+        var mockBlobClient = new Mock<Azure.Storage.Blobs.BlobClient>();
+        var notFoundException = new Azure.RequestFailedException(404, "Blob not found");
+        mockBlobClient.Setup(x => x.GetPropertiesAsync(default, default))
+            .ThrowsAsync(notFoundException);
+        
+        _mockBlobClientFactory.Setup(x => x.CreateBlobClient(It.IsAny<string>()))
+            .Returns(mockBlobClient.Object);
+        
         var operationId = "test-op-error";
         var sourceUri = "https://example.blob.core.windows.net/nonexistent/blob";
         var destUri = "https://example.blob.core.windows.net/dest/blob";
@@ -196,7 +220,7 @@ public class BlobCopyServiceTests
 
         // Create and start operation
         var operation = await _service.StartCopyAsync(operationId, sourceUri, destUri);
-        operation.Status = BlobCopyStatus.Running;
+        operation.Status = BlobCopyStatus.InProgress;
 
         // Cancel it
         var cancelled = await _service.CancelCopyAsync(operationId);
@@ -281,14 +305,14 @@ public class BlobCopyServiceTests
         var destUri = "https://example.blob.core.windows.net/dest/blob";
 
         var operation = await _service.StartCopyAsync(operationId, sourceUri, destUri);
-        operation.Status = BlobCopyStatus.Running;
-        operation.BytesCopied = 1024;
+        operation.Status = BlobCopyStatus.InProgress;
+        operation.BytesTransferred = 1024;
 
         var status = _service.GetOperationStatus(operationId);
 
         Assert.NotNull(status);
-        Assert.Equal(BlobCopyStatus.Running, status.Status);
-        Assert.Equal(1024, status.BytesCopied);
+        Assert.Equal(BlobCopyStatus.InProgress, status.Status);
+        Assert.Equal(1024, status.BytesTransferred);
     }
 
     // ExecuteCopyAsync tests

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
+using Microsoft.Extensions.Logging;
 
 namespace BlobCopy.Tests.Integration.Controllers;
 
@@ -47,7 +48,7 @@ public class StatusEndpointIntegrationTests
             DestinationUri = "https://storage.blob.core.windows.net/dest/file.vhd",
             StartedAt = DateTime.UtcNow.AddSeconds(-5),
             TotalBytes = 1024 * 1024 * 100,
-            BytesCopied = 0
+            BytesTransferred = 0
         };
 
         _mockCopyService
@@ -59,7 +60,7 @@ public class StatusEndpointIntegrationTests
         var okResult = Assert.IsType<OkObjectResult>(result);
         var returnedOp = Assert.IsType<BlobCopyOperation>(okResult.Value);
         Assert.Equal(BlobCopyStatus.Pending, returnedOp.Status);
-        Assert.Equal(0, returnedOp.BytesCopied);
+        Assert.Equal(0, returnedOp.BytesTransferred);
     }
 
     [Fact]
@@ -69,12 +70,12 @@ public class StatusEndpointIntegrationTests
         var operation = new BlobCopyOperation
         {
             Id = operationId,
-            Status = BlobCopyStatus.Running,
+            Status = BlobCopyStatus.InProgress,
             SourceUri = "https://storage.blob.core.windows.net/source/file.vhd",
             DestinationUri = "https://storage.blob.core.windows.net/dest/file.vhd",
             StartedAt = DateTime.UtcNow.AddSeconds(-60),
             TotalBytes = 1024 * 1024 * 100,
-            BytesCopied = 1024 * 1024 * 50 // 50% complete
+            BytesTransferred = 1024 * 1024 * 50 // 50% complete
         };
 
         _mockCopyService
@@ -85,8 +86,8 @@ public class StatusEndpointIntegrationTests
 
         var okResult = Assert.IsType<OkObjectResult>(result);
         var returnedOp = Assert.IsType<BlobCopyOperation>(okResult.Value);
-        Assert.Equal(BlobCopyStatus.Running, returnedOp.Status);
-        Assert.Equal(1024 * 1024 * 50, returnedOp.BytesCopied);
+        Assert.Equal(BlobCopyStatus.InProgress, returnedOp.Status);
+        Assert.Equal(1024 * 1024 * 50, returnedOp.BytesTransferred);
     }
 
     [Fact]
@@ -104,7 +105,7 @@ public class StatusEndpointIntegrationTests
             StartedAt = startTime,
             CompletedAt = endTime,
             TotalBytes = 1024 * 1024 * 100,
-            BytesCopied = 1024 * 1024 * 100,
+            BytesTransferred = 1024 * 1024 * 100,
             DurationSeconds = 120
         };
 
@@ -133,7 +134,7 @@ public class StatusEndpointIntegrationTests
             DestinationUri = "https://storage.blob.core.windows.net/dest/file.vhd",
             StartedAt = DateTime.UtcNow.AddSeconds(-30),
             CompletedAt = DateTime.UtcNow,
-            BytesCopied = 1024 * 512,
+            BytesTransferred = 1024 * 512,
             TotalBytes = 1024 * 1024 * 100,
             Errors = new List<ValidationError>
             {
@@ -171,7 +172,7 @@ public class StatusEndpointIntegrationTests
             DestinationUri = "https://storage.blob.core.windows.net/dest/file.vhd",
             StartedAt = DateTime.UtcNow.AddSeconds(-45),
             CompletedAt = DateTime.UtcNow.AddSeconds(-10),
-            BytesCopied = 1024 * 1024 * 75,
+            BytesTransferred = 1024 * 1024 * 75,
             TotalBytes = 1024 * 1024 * 100
         };
 
@@ -232,13 +233,13 @@ public class StatusEndpointIntegrationTests
         var operation = new BlobCopyOperation
         {
             Id = operationId,
-            Status = BlobCopyStatus.Running,
+            Status = BlobCopyStatus.InProgress,
             SourceUri = sourceUri,
             DestinationUri = destUri,
             SourceBlobName = "file.vhd",
             StartedAt = DateTime.UtcNow.AddSeconds(-30),
             TotalBytes = 1024 * 1024 * 100,
-            BytesCopied = 1024 * 1024 * 50,
+            BytesTransferred = 1024 * 1024 * 50,
             Errors = new List<ValidationError>()
         };
 
@@ -254,13 +255,13 @@ public class StatusEndpointIntegrationTests
         Assert.Equal(operationId, returnedOp.Id);
         Assert.Equal(sourceUri, returnedOp.SourceUri);
         Assert.Equal(destUri, returnedOp.DestinationUri);
-        Assert.Equal(BlobCopyStatus.Running, returnedOp.Status);
-        Assert.Equal(1024 * 1024 * 50, returnedOp.BytesCopied);
+        Assert.Equal(BlobCopyStatus.InProgress, returnedOp.Status);
+        Assert.Equal(1024 * 1024 * 50, returnedOp.BytesTransferred);
     }
 
     [Theory]
     [InlineData(BlobCopyStatus.Pending)]
-    [InlineData(BlobCopyStatus.Running)]
+    [InlineData(BlobCopyStatus.InProgress)]
     [InlineData(BlobCopyStatus.Completed)]
     [InlineData(BlobCopyStatus.Failed)]
     [InlineData(BlobCopyStatus.Cancelled)]

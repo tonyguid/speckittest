@@ -38,6 +38,16 @@ public class ProgressUpdate
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
     /// <summary>
+    /// UTC timestamp of this progress update.
+    /// Alias for UpdatedAt for backward compatibility.
+    /// </summary>
+    public DateTime TimestampUtc
+    {
+        get => UpdatedAt;
+        set => UpdatedAt = value;
+    }
+
+    /// <summary>
     /// Transfer rate in MB/s.
     /// For display purposes.
     /// </summary>

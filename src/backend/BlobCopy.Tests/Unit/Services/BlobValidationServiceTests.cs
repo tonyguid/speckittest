@@ -3,20 +3,33 @@ using BlobCopy.API.Models;
 using BlobCopy.API.Services;
 using Moq;
 using Xunit;
+using Microsoft.Extensions.Logging;
 
 namespace BlobCopy.Tests.Unit.Services;
 
 public class BlobValidationServiceTests
 {
     private readonly Mock<BlobServiceClient> _mockBlobServiceClient;
+    private readonly Mock<IBlobClientFactory> _mockBlobClientFactory;
     private readonly Mock<ILogger<BlobValidationService>> _mockLogger;
     private readonly BlobValidationService _service;
 
     public BlobValidationServiceTests()
     {
         _mockBlobServiceClient = new Mock<BlobServiceClient>();
+        _mockBlobClientFactory = new Mock<IBlobClientFactory>();
         _mockLogger = new Mock<ILogger<BlobValidationService>>();
-        _service = new BlobValidationService(_mockBlobServiceClient.Object, _mockLogger.Object);
+        
+        // Setup factory to return mock BlobClient that simulates 404 (not found)
+        var mockBlobClient = new Mock<Azure.Storage.Blobs.BlobClient>();
+        var notFoundException = new Azure.RequestFailedException(404, "Blob not found");
+        mockBlobClient.Setup(x => x.GetPropertiesAsync(default, default))
+            .ThrowsAsync(notFoundException);
+        
+        _mockBlobClientFactory.Setup(x => x.CreateBlobClient(It.IsAny<string>()))
+            .Returns(mockBlobClient.Object);
+            
+        _service = new BlobValidationService(_mockBlobServiceClient.Object, _mockBlobClientFactory.Object, _mockLogger.Object);
     }
 
     // Constructor tests
@@ -24,7 +37,7 @@ public class BlobValidationServiceTests
     public void Constructor_ThrowsArgumentNullException_WhenBlobServiceClientIsNull()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            new BlobValidationService(null, _mockLogger.Object)
+            new BlobValidationService(null, _mockBlobClientFactory.Object, _mockLogger.Object)
         );
     }
 
@@ -32,14 +45,14 @@ public class BlobValidationServiceTests
     public void Constructor_ThrowsArgumentNullException_WhenLoggerIsNull()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            new BlobValidationService(_mockBlobServiceClient.Object, null)
+            new BlobValidationService(_mockBlobServiceClient.Object, _mockBlobClientFactory.Object, null)
         );
     }
 
     [Fact]
     public void Constructor_CreatesInstance_WhenPropertiesValid()
     {
-        var service = new BlobValidationService(_mockBlobServiceClient.Object, _mockLogger.Object);
+        var service = new BlobValidationService(_mockBlobServiceClient.Object, _mockBlobClientFactory.Object, _mockLogger.Object);
         Assert.NotNull(service);
     }
 

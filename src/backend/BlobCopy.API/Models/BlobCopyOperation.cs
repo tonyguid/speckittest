@@ -57,6 +57,23 @@ public class BlobCopyOperation
     public string? ErrorMessage { get; set; } = null;
 
     /// <summary>
+    /// List of validation or operational errors.
+    /// Used for detailed error reporting in tests and API responses.
+    /// </summary>
+    public List<ValidationError>? Errors { get; set; } = null;
+
+    /// <summary>
+    /// Duration of the operation in seconds.
+    /// Calculated from StartedAt and CompletedAt.
+    /// </summary>
+    public double? DurationSeconds { get; set; } = null;
+
+    /// <summary>
+    /// Name of the source blob (extracted from SourceUri).
+    /// </summary>
+    public string? SourceBlobName { get; set; } = null;
+
+    /// <summary>
     /// Error code for programmatic handling.
     /// Used for retry logic, logging categorization.
     /// </summary>

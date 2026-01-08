@@ -1,0 +1,839 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BlobCopy.API</name>
+    </assembly>
+    <members>
+        <member name="T:BlobCopy.API.Controllers.BlobCopyController">
+            <summary>
+            Controller for blob copy operations.
+            Handles validation, copy initiation, status tracking, and cancellation.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Controllers.BlobCopyController.#ctor(BlobCopy.API.Services.IBlobValidationService,BlobCopy.API.Services.IBlobCopyService,BlobCopy.API.Services.IProgressNotificationService,Microsoft.Extensions.Logging.ILogger{BlobCopy.API.Controllers.BlobCopyController})">
+            <summary>
+            Initializes a new instance of BlobCopyController.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Controllers.BlobCopyController.ValidateAsync(BlobCopy.API.Models.CopyRequest,System.Threading.CancellationToken)">
+            <summary>
+            Validates source and destination blob URIs before copy operation.
+            </summary>
+            <remarks>
+            Checks URI format, blob existence, and user permissions.
+            Does NOT start the actual copy operation.
+            </remarks>
+            <param name="request">Copy request with source and destination URIs</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>200 OK if valid with empty errors array, or 400 Bad Request with validation errors</returns>
+            <response code="200">Validation successful (errors array will be empty)</response>
+            <response code="400">Validation failed with specific error details</response>
+            <response code="500">Server error during validation</response>
+        </member>
+        <member name="M:BlobCopy.API.Controllers.BlobCopyController.StartAsync(BlobCopy.API.Models.CopyRequest,System.Threading.CancellationToken)">
+            <summary>
+            Starts a new blob copy operation.
+            </summary>
+            <remarks>
+            Creates and initializes a copy operation. Returns an operation ID that can be used
+            to track progress via WebSocket or polling /status endpoint.
+            </remarks>
+            <param name="request">Copy request with source and destination URIs</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>201 Created with operation details including operation ID</returns>
+            <response code="201">Copy operation created successfully</response>
+            <response code="400">Invalid request parameters</response>
+            <response code="500">Server error starting copy operation</response>
+        </member>
+        <member name="M:BlobCopy.API.Controllers.BlobCopyController.GetStatus(System.String)">
+            <summary>
+            Gets the current status of a copy operation.
+            </summary>
+            <remarks>
+            Returns detailed status including bytes copied, total bytes, current status,
+            and any errors. Useful for polling clients that don't support WebSocket.
+            </remarks>
+            <param name="id">Operation ID returned from /start endpoint</param>
+            <returns>200 OK with operation status, or 404 Not Found if operation doesn't exist</returns>
+            <response code="200">Operation status retrieved successfully</response>
+            <response code="404">Operation not found</response>
+            <response code="500">Server error retrieving status</response>
+        </member>
+        <member name="M:BlobCopy.API.Controllers.BlobCopyController.GetStatusAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets the current status of a copy operation. (Async variant for compatibility)
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Controllers.BlobCopyController.CancelAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Cancels a copy operation that is in progress or pending.
+            </summary>
+            <remarks>
+            Stops an ongoing copy operation. Cannot cancel a completed or failed operation.
+            Returns 200 OK with updated operation status.
+            </remarks>
+            <param name="id">Operation ID to cancel</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>200 OK with cancelled operation status, or 404 Not Found</returns>
+            <response code="200">Operation cancelled successfully</response>
+            <response code="404">Operation not found</response>
+            <response code="500">Server error cancelling operation</response>
+        </member>
+        <member name="M:BlobCopy.API.Controllers.BlobCopyController.Health">
+            <summary>
+            Health check endpoint for service status.
+            </summary>
+            <remarks>
+            Returns 200 OK if service is healthy and can connect to Azure Storage.
+            </remarks>
+            <returns>200 OK if healthy</returns>
+            <response code="200">Service is healthy</response>
+            <response code="503">Service is unhealthy</response>
+        </member>
+        <member name="T:BlobCopy.API.Extensions.AzureStorageServiceCollectionExtensions">
+            <summary>
+            Extension methods for configuring Azure Storage services in the DI container.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Extensions.AzureStorageServiceCollectionExtensions.AddAzureStorageServices(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Uri)">
+            <summary>
+            Adds Azure Storage Blob client services to the dependency injection container.
+            Configures BlobServiceClient with DefaultAzureCredential for managed identity support.
+            </summary>
+            <param name="services">The service collection</param>
+            <param name="storageAccountUri">URI of the Azure Storage account (e.g., https://myaccount.blob.core.windows.net)</param>
+            <returns>The service collection for chaining</returns>
+        </member>
+        <member name="M:BlobCopy.API.Extensions.AzureStorageServiceCollectionExtensions.AddAzureStorageServicesWithConnectionString(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
+            <summary>
+            Adds Azure Storage Blob client services using a connection string.
+            Useful for local development with Azure Storage Emulator or for testing.
+            </summary>
+            <param name="services">The service collection</param>
+            <param name="connectionString">Azure Storage connection string</param>
+            <returns>The service collection for chaining</returns>
+        </member>
+        <member name="T:BlobCopy.API.Extensions.BlobCopyServiceCollectionExtensions">
+            <summary>
+            Extension methods for configuring blob copy business services in the DI container.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Extensions.BlobCopyServiceCollectionExtensions.AddBlobCopyServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds blob copy business services to the dependency injection container.
+            Registers validation, copy operation, and progress notification services.
+            </summary>
+            <param name="services">The service collection</param>
+            <returns>The service collection for chaining</returns>
+        </member>
+        <member name="T:BlobCopy.API.Extensions.ObservabilityServiceCollectionExtensions">
+            <summary>
+            Extension methods for configuring application observability and logging.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Extensions.ObservabilityServiceCollectionExtensions.AddApplicationInsights(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
+            <summary>
+            Adds Application Insights telemetry collection for the blob copy API.
+            Enables tracing of requests, exceptions, dependencies, and custom events.
+            </summary>
+            <param name="services">The service collection</param>
+            <param name="instrumentationKey">Application Insights instrumentation key</param>
+            <returns>The service collection for chaining</returns>
+        </member>
+        <member name="M:BlobCopy.API.Extensions.ObservabilityServiceCollectionExtensions.AddStructuredLogging(Microsoft.Extensions.Logging.ILoggingBuilder)">
+            <summary>
+            Adds structured logging with correlation IDs for distributed tracing.
+            </summary>
+            <param name="builder">The logging builder</param>
+            <returns>The logging builder for chaining</returns>
+        </member>
+        <member name="T:BlobCopy.API.Extensions.SignalRServiceCollectionExtensions">
+            <summary>
+            Extension methods for configuring SignalR services in the DI container.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Extensions.SignalRServiceCollectionExtensions.AddBlobCopySignalR(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds SignalR services with optimized configuration for blob copy operations.
+            Sets up the BlobCopyHub with appropriate timeouts, message sizes, and JSON protocol options.
+            </summary>
+            <param name="services">The service collection</param>
+            <returns>The service collection for chaining</returns>
+        </member>
+        <member name="M:BlobCopy.API.Extensions.SignalRServiceCollectionExtensions.UseSignalRCors(Microsoft.AspNetCore.Builder.WebApplication,System.String[])">
+            <summary>
+            Configures CORS for SignalR WebSocket connections.
+            Allows cross-origin requests from frontend applications.
+            </summary>
+            <param name="app">The application builder</param>
+            <param name="allowedOrigins">Optional list of allowed origins. If null, allows all origins.</param>
+        </member>
+        <member name="M:BlobCopy.API.Extensions.SignalRServiceCollectionExtensions.MapBlobCopyHub(Microsoft.AspNetCore.Builder.WebApplication,System.String)">
+            <summary>
+            Maps the BlobCopyHub to a SignalR endpoint.
+            </summary>
+            <param name="app">The application builder</param>
+            <param name="hubPattern">The URL pattern for the hub (default: /signalr/blob-copy-hub)</param>
+        </member>
+        <member name="T:BlobCopy.API.Hubs.BlobCopyHub">
+            <summary>
+            SignalR hub for real-time blob copy progress updates.
+            Manages WebSocket connections and broadcasts progress to connected clients.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Hubs.BlobCopyHub.#ctor(Microsoft.Extensions.Logging.ILogger{BlobCopy.API.Hubs.BlobCopyHub})">
+            <summary>
+            Initializes a new instance of the BlobCopyHub class.
+            </summary>
+            <param name="logger">Logger instance for diagnostics</param>
+        </member>
+        <member name="M:BlobCopy.API.Hubs.BlobCopyHub.OnConnectedAsync">
+            <summary>
+            Called when a client connects to the hub.
+            Sends a connection established message to the client.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Hubs.BlobCopyHub.OnDisconnectedAsync(System.Exception)">
+            <summary>
+            Called when a client disconnects from the hub.
+            Cleans up any tracked operations for this connection.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Hubs.BlobCopyHub.JoinCopyOperation(System.String)">
+            <summary>
+            Allows a client to subscribe to progress updates for a specific copy operation.
+            Called by client after copy operation is started on the backend.
+            </summary>
+            <param name="copyOperationId">ID of the copy operation to track</param>
+        </member>
+        <member name="M:BlobCopy.API.Hubs.BlobCopyHub.LeaveCopyOperation(System.String)">
+            <summary>
+            Allows a client to unsubscribe from progress updates for a specific copy operation.
+            </summary>
+            <param name="copyOperationId">ID of the copy operation to stop tracking</param>
+        </member>
+        <member name="M:BlobCopy.API.Hubs.BlobCopyHub.BroadcastProgressUpdate(System.String,BlobCopy.API.Models.ProgressUpdate)">
+            <summary>
+            Called by the backend service to broadcast a progress update to all clients tracking this operation.
+            </summary>
+            <param name="copyOperationId">ID of the copy operation</param>
+            <param name="update">Progress update to broadcast</param>
+        </member>
+        <member name="M:BlobCopy.API.Hubs.BlobCopyHub.BroadcastCopyCompleted(System.String,System.String,System.Int64,System.Int32,System.DateTime)">
+            <summary>
+            Called by the backend service to notify all clients that a copy operation completed successfully.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Hubs.BlobCopyHub.BroadcastCopyFailed(System.String,System.String,System.String,System.Boolean,System.DateTime)">
+            <summary>
+            Called by the backend service to notify all clients that a copy operation failed.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Hubs.BlobCopyHub.BroadcastOperationCancelled(System.String,System.Int64,System.DateTime,System.String)">
+            <summary>
+            Called by the backend service to notify all clients that a copy operation was cancelled.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Hubs.BlobCopyHub.GetConnectedClientsForOperation(System.String)">
+            <summary>
+            Returns the number of connected clients for a specific operation (for testing/monitoring).
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Hubs.BlobCopyHub.GetTotalConnectedClients">
+            <summary>
+            Returns the total number of connected clients (for testing/monitoring).
+            </summary>
+        </member>
+        <member name="T:BlobCopy.API.Hubs.IBlobCopyClient">
+            <summary>
+            Client methods that can be called from the server to connected SignalR clients.
+            Implemented by the frontend JavaScript/TypeScript client.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Hubs.IBlobCopyClient.ProgressUpdate(BlobCopy.API.Models.ProgressUpdate)">
+            <summary>
+            Called by server to notify client of progress updates during an active copy operation.
+            Sent every 1-5 seconds during active copy.
+            </summary>
+            <param name="update">Progress update containing bytes transferred, percentage, transfer rate, etc.</param>
+        </member>
+        <member name="M:BlobCopy.API.Hubs.IBlobCopyClient.CopyCompleted(System.String,System.String,System.Int64,System.Int32,System.DateTime)">
+            <summary>
+            Called by server to notify client that a copy operation completed successfully.
+            Client should stop polling/waiting and display success message.
+            </summary>
+            <param name="copyOperationId">ID of the completed operation</param>
+            <param name="destinationUri">URI of the copied blob</param>
+            <param name="totalBytes">Total bytes copied</param>
+            <param name="durationSeconds">Duration of the copy operation in seconds</param>
+            <param name="completedAt">Timestamp of completion (ISO 8601)</param>
+        </member>
+        <member name="M:BlobCopy.API.Hubs.IBlobCopyClient.CopyFailed(System.String,System.String,System.String,System.Boolean,System.DateTime)">
+            <summary>
+            Called by server to notify client that a copy operation encountered an error.
+            Client should stop polling/waiting and display error message.
+            </summary>
+            <param name="copyOperationId">ID of the failed operation</param>
+            <param name="errorCode">Machine-readable error code (e.g., "SOURCE_NOT_FOUND")</param>
+            <param name="errorMessage">Human-readable error message</param>
+            <param name="retryable">Whether the error is retryable (transient vs permanent)</param>
+            <param name="failedAt">Timestamp of failure (ISO 8601)</param>
+        </member>
+        <member name="M:BlobCopy.API.Hubs.IBlobCopyClient.OperationCancelled(System.String,System.Int64,System.DateTime,System.String)">
+            <summary>
+            Called by server to notify client that a copy operation was cancelled by the user.
+            </summary>
+            <param name="copyOperationId">ID of the cancelled operation</param>
+            <param name="bytesTransferred">Bytes transferred before cancellation</param>
+            <param name="cancelledAt">Timestamp of cancellation (ISO 8601)</param>
+            <param name="message">Message to display to user</param>
+        </member>
+        <member name="M:BlobCopy.API.Hubs.IBlobCopyClient.ConnectionEstablished(System.String,System.DateTime,System.String)">
+            <summary>
+            Called by server when connection is established successfully.
+            Client can use this to mark the connection as ready.
+            </summary>
+            <param name="message">Connection established message</param>
+            <param name="serverTime">Server timestamp (ISO 8601)</param>
+            <param name="connectionId">Unique connection ID assigned by SignalR</param>
+        </member>
+        <member name="T:BlobCopy.API.Middleware.RequestLoggingMiddleware">
+            <summary>
+            Middleware for logging HTTP requests and responses with correlation IDs.
+            Enables distributed tracing across the application stack.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Middleware.RequestLoggingMiddleware.#ctor(Microsoft.AspNetCore.Http.RequestDelegate,Microsoft.Extensions.Logging.ILogger{BlobCopy.API.Middleware.RequestLoggingMiddleware})">
+            <summary>
+            Initializes a new instance of the RequestLoggingMiddleware.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Middleware.RequestLoggingMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            Processes an HTTP request and logs request/response details.
+            Generates and propagates correlation IDs for distributed tracing.
+            </summary>
+        </member>
+        <member name="T:BlobCopy.API.Models.BlobCopyOperation">
+            <summary>
+            Represents a single blob copy operation with complete state tracking.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.BlobCopyOperation.Id">
+            <summary>
+            Unique identifier for this copy operation (UUID v4, generated by backend).
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.BlobCopyOperation.SourceUri">
+            <summary>
+            Source blob URI (validated Azure Blob Storage URI).
+            Format: https://[account].blob.core.windows.net/[container]/[blob]
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.BlobCopyOperation.DestinationUri">
+            <summary>
+            Destination blob URI (validated Azure Blob Storage URI).
+            Format: https://[account].blob.core.windows.net/[container]/[blob]
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.BlobCopyOperation.Status">
+            <summary>
+            Current status of the copy operation.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.BlobCopyOperation.ProgressPercentage">
+            <summary>
+            Progress as percentage (0-100).
+            Updated in real-time via SignalR.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.BlobCopyOperation.BytesTransferred">
+            <summary>
+            Bytes transferred so far.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.BlobCopyOperation.TotalBytes">
+            <summary>
+            Total bytes to transfer.
+            Known after initial blob properties fetch.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.BlobCopyOperation.EstimatedTimeRemaining">
+            <summary>
+            Estimated time remaining in seconds.
+            Calculated from current transfer rate.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.BlobCopyOperation.ErrorMessage">
+            <summary>
+            Error message if operation failed.
+            Null if operation is pending, in-progress, or completed successfully.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.BlobCopyOperation.Errors">
+            <summary>
+            List of validation or operational errors.
+            Used for detailed error reporting in tests and API responses.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.BlobCopyOperation.DurationSeconds">
+            <summary>
+            Duration of the operation in seconds.
+            Calculated from StartedAt and CompletedAt.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.BlobCopyOperation.SourceBlobName">
+            <summary>
+            Name of the source blob (extracted from SourceUri).
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.BlobCopyOperation.ErrorCode">
+            <summary>
+            Error code for programmatic handling.
+            Used for retry logic, logging categorization.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.BlobCopyOperation.StartedAt">
+            <summary>
+            Timestamp when copy operation was initiated (ISO 8601).
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.BlobCopyOperation.CompletedAt">
+            <summary>
+            Timestamp when copy operation completed (ISO 8601).
+            Null if operation is still pending or in-progress.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.BlobCopyOperation.CorrelationId">
+            <summary>
+            Correlation ID for distributed tracing.
+            Links this operation to Application Insights traces, logs, and requests.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.BlobCopyOperation.InitiatedBy">
+            <summary>
+            Username/principal ID of the user who initiated the copy.
+            Populated from Entra ID claims.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.BlobCopyOperation.CancellationRequested">
+            <summary>
+            Cancellation token state.
+            True if user has requested cancellation; operation may still be completing.
+            </summary>
+        </member>
+        <member name="T:BlobCopy.API.Models.BlobCopyStatus">
+            <summary>
+            Enumeration of all possible states for a blob copy operation.
+            </summary>
+        </member>
+        <member name="F:BlobCopy.API.Models.BlobCopyStatus.Pending">
+            <summary>
+            Operation created but not yet started.
+            Validation has passed; waiting for copy to begin.
+            </summary>
+        </member>
+        <member name="F:BlobCopy.API.Models.BlobCopyStatus.InProgress">
+            <summary>
+            Copy operation is actively transferring data.
+            Progress updates are being sent via SignalR.
+            </summary>
+        </member>
+        <member name="F:BlobCopy.API.Models.BlobCopyStatus.Completed">
+            <summary>
+            Copy completed successfully.
+            Destination blob is fully available and matches source.
+            </summary>
+        </member>
+        <member name="F:BlobCopy.API.Models.BlobCopyStatus.Failed">
+            <summary>
+            Copy operation failed.
+            Check ErrorMessage and ErrorCode for details.
+            Retry is available unless it's a permanent error (auth, not found, etc.).
+            </summary>
+        </member>
+        <member name="F:BlobCopy.API.Models.BlobCopyStatus.Cancelled">
+            <summary>
+            User cancelled the operation.
+            May have transferred partial data depending on cancellation timing.
+            </summary>
+        </member>
+        <member name="F:BlobCopy.API.Models.BlobCopyStatus.NotFound">
+            <summary>
+            The requested operation or resource was not found.
+            Used for 404 responses.
+            </summary>
+        </member>
+        <member name="T:BlobCopy.API.Models.CopyRequest">
+            <summary>
+            Request payload for initiating a blob copy operation.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.CopyRequest.SourceUri">
+            <summary>
+            Source blob URI in Azure Blob Storage.
+            Format: https://[account].blob.core.windows.net/[container]/[blob]
+            Required, must be a valid Azure Blob Storage URI.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.CopyRequest.DestinationUri">
+            <summary>
+            Destination blob URI in Azure Blob Storage.
+            Format: https://[account].blob.core.windows.net/[container]/[blob]
+            Required, must be a valid Azure Blob Storage URI.
+            Must be different from SourceUri.
+            </summary>
+        </member>
+        <member name="T:BlobCopy.API.Models.ErrorResponse">
+            <summary>
+            Response payload when a copy operation fails validation or encounters an error.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ErrorResponse.Status">
+            <summary>
+            HTTP status code (mirrors the response status).
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ErrorResponse.Code">
+            <summary>
+            Machine-readable error code.
+            e.g., "INVALID_REQUEST", "VALIDATION_FAILED", "NOT_FOUND", "UNAUTHORIZED"
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ErrorResponse.Message">
+            <summary>
+            Human-readable error message.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ErrorResponse.CorrelationId">
+            <summary>
+            Correlation ID for tracing this specific error.
+            Can be used to find logs in Application Insights.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ErrorResponse.ValidationErrors">
+            <summary>
+            List of validation errors (if applicable).
+            Null if this is not a validation error (400 Bad Request).
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ErrorResponse.Timestamp">
+            <summary>
+            Timestamp of the error (ISO 8601).
+            </summary>
+        </member>
+        <member name="T:BlobCopy.API.Models.ProgressUpdate">
+            <summary>
+            Data structure sent to clients via SignalR during active copy operations.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ProgressUpdate.CopyOperationId">
+            <summary>
+            Unique identifier of the copy operation.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ProgressUpdate.BytesTransferred">
+            <summary>
+            Bytes transferred in this interval.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ProgressUpdate.TotalBytes">
+            <summary>
+            Total bytes for the entire blob.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ProgressUpdate.ProgressPercentage">
+            <summary>
+            Progress percentage (0-100).
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ProgressUpdate.EstimatedSecondsRemaining">
+            <summary>
+            Estimated seconds remaining (rounded).
+            Null if indeterminate.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ProgressUpdate.UpdatedAt">
+            <summary>
+            Timestamp of this progress update (ISO 8601).
+            Used for client-side progress rate calculation.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ProgressUpdate.TimestampUtc">
+            <summary>
+            UTC timestamp of this progress update.
+            Alias for UpdatedAt for backward compatibility.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ProgressUpdate.TransferRateMbps">
+            <summary>
+            Transfer rate in MB/s.
+            For display purposes.
+            </summary>
+        </member>
+        <member name="T:BlobCopy.API.Models.ValidationError">
+            <summary>
+            Details about a validation failure.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ValidationError.Field">
+            <summary>
+            Field that failed validation.
+            e.g., "sourceUri", "destinationUri"
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ValidationError.Message">
+            <summary>
+            Error message describing the validation failure.
+            User-friendly, actionable.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ValidationError.Code">
+            <summary>
+            Error code for programmatic handling.
+            e.g., "INVALID_URI_FORMAT", "URI_NOT_FOUND", "INSUFFICIENT_PERMISSIONS"
+            </summary>
+        </member>
+        <member name="T:BlobCopy.API.Services.BlobClientFactory">
+            <summary>
+            Default implementation of IBlobClientFactory.
+            Creates BlobClient instances using Azure Storage SDK.
+            </summary>
+        </member>
+        <member name="T:BlobCopy.API.Services.IBlobCopyService">
+            <summary>
+            Service for managing blob copy operations with streaming and progress tracking.
+            Handles chunked downloads and uploads with real-time progress updates.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Services.IBlobCopyService.StartCopyAsync(System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Starts a copy operation from source to destination blob.
+            </summary>
+            <param name="operationId">Unique operation ID</param>
+            <param name="sourceUri">Source blob URI</param>
+            <param name="destinationUri">Destination blob URI</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>BlobCopyOperation with metadata</returns>
+        </member>
+        <member name="M:BlobCopy.API.Services.IBlobCopyService.ExecuteCopyAsync(BlobCopy.API.Models.BlobCopyOperation,System.Func{System.Int64,System.Int64,System.Threading.Tasks.Task},System.Threading.CancellationToken)">
+            <summary>
+            Performs streaming copy of blob data with progress tracking.
+            </summary>
+            <param name="operation">Copy operation context</param>
+            <param name="onProgressUpdate">Callback for progress updates</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Updated BlobCopyOperation with completion status</returns>
+        </member>
+        <member name="M:BlobCopy.API.Services.IBlobCopyService.CancelCopyAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Cancels an in-progress copy operation.
+            </summary>
+            <param name="operationId">Operation ID to cancel</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Cancelled BlobCopyOperation</returns>
+        </member>
+        <member name="M:BlobCopy.API.Services.IBlobCopyService.GetOperationStatus(System.String)">
+            <summary>
+            Gets the current progress of a copy operation.
+            </summary>
+            <param name="operationId">Operation ID</param>
+            <returns>Current BlobCopyOperation status</returns>
+        </member>
+        <member name="T:BlobCopy.API.Services.BlobCopyService">
+            <summary>
+            Implementation of IBlobCopyService.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Services.BlobCopyService.#ctor(Azure.Storage.Blobs.BlobServiceClient,BlobCopy.API.Services.IBlobClientFactory,Microsoft.Extensions.Logging.ILogger{BlobCopy.API.Services.BlobCopyService})">
+            <summary>
+            Initializes a new instance of BlobCopyService.
+            </summary>
+        </member>
+        <member name="T:BlobCopy.API.Services.IBlobValidationService">
+            <summary>
+            Service for validating blob URIs and permissions before copy operations.
+            Checks URI format, blob existence, and user permissions.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Services.IBlobValidationService.ValidateUrisAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Validates both source and destination URIs and checks permissions.
+            </summary>
+            <param name="sourceUri">Source blob URI to validate</param>
+            <param name="destinationUri">Destination blob URI to validate</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>List of ValidationError if invalid, empty list if valid</returns>
+        </member>
+        <member name="M:BlobCopy.API.Services.IBlobValidationService.ValidateSourceBlobAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Validates source blob exists and is readable.
+            </summary>
+            <param name="sourceUri">Source blob URI</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>ValidationError if invalid, null if valid</returns>
+        </member>
+        <member name="M:BlobCopy.API.Services.IBlobValidationService.ValidateDestinationAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Validates destination container exists and is writable.
+            </summary>
+            <param name="destinationUri">Destination blob URI</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>ValidationError if invalid, null if valid</returns>
+        </member>
+        <member name="M:BlobCopy.API.Services.IBlobValidationService.GetBlobSizeAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets the size in bytes of a blob at the given URI.
+            </summary>
+            <param name="blobUri">Blob URI</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Blob size in bytes, or -1 if blob doesn't exist</returns>
+        </member>
+        <member name="T:BlobCopy.API.Services.BlobValidationService">
+            <summary>
+            Implementation of IBlobValidationService.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Services.BlobValidationService.#ctor(Azure.Storage.Blobs.BlobServiceClient,BlobCopy.API.Services.IBlobClientFactory,Microsoft.Extensions.Logging.ILogger{BlobCopy.API.Services.BlobValidationService})">
+            <summary>
+            Initializes a new instance of BlobValidationService.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Services.BlobValidationService.ValidateUriFormat(System.String,System.String)">
+            <summary>
+            Validates URI format per Azure Blob Storage requirements.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Services.BlobValidationService.ValidateContainerName(System.String)">
+            <summary>
+            Validates container name per Azure Blob Storage requirements.
+            </summary>
+        </member>
+        <member name="T:BlobCopy.API.Services.IBlobClientFactory">
+            <summary>
+            Factory for creating BlobClient instances.
+            Allows for mocking in unit tests.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Services.IBlobClientFactory.CreateBlobClient(System.String)">
+            <summary>
+            Creates a BlobClient for the specified URI.
+            </summary>
+            <param name="blobUri">URI of the blob</param>
+            <returns>BlobClient instance</returns>
+        </member>
+        <member name="T:BlobCopy.API.Services.IProgressNotificationService">
+            <summary>
+            Service for managing real-time progress notifications via SignalR.
+            Broadcasts progress updates to subscribed clients.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Services.IProgressNotificationService.NotifyProgressAsync(System.String,BlobCopy.API.Models.ProgressUpdate,System.Threading.CancellationToken)">
+            <summary>
+            Notifies all subscribed clients of progress update.
+            </summary>
+            <param name="operationId">Operation ID</param>
+            <param name="progress">Progress update with bytes copied and total bytes</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Awaitable task</returns>
+        </member>
+        <member name="M:BlobCopy.API.Services.IProgressNotificationService.NotifyCompletionAsync(System.String,BlobCopy.API.Models.BlobCopyOperation,System.Threading.CancellationToken)">
+            <summary>
+            Notifies all subscribed clients of successful completion.
+            </summary>
+            <param name="operationId">Operation ID</param>
+            <param name="operation">Completed operation</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Awaitable task</returns>
+        </member>
+        <member name="M:BlobCopy.API.Services.IProgressNotificationService.NotifyFailureAsync(System.String,BlobCopy.API.Models.BlobCopyOperation,System.Threading.CancellationToken)">
+            <summary>
+            Notifies all subscribed clients of copy failure.
+            </summary>
+            <param name="operationId">Operation ID</param>
+            <param name="operation">Failed operation with error details</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Awaitable task</returns>
+        </member>
+        <member name="M:BlobCopy.API.Services.IProgressNotificationService.NotifyCancellationAsync(System.String,BlobCopy.API.Models.BlobCopyOperation,System.Threading.CancellationToken)">
+            <summary>
+            Notifies all subscribed clients of operation cancellation.
+            </summary>
+            <param name="operationId">Operation ID</param>
+            <param name="operation">Cancelled operation</param>
+            <param name="cancellationToken">Cancellation token</param>
+            <returns>Awaitable task</returns>
+        </member>
+        <member name="T:BlobCopy.API.Services.ProgressNotificationService">
+            <summary>
+            Implementation of IProgressNotificationService using SignalR.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Services.ProgressNotificationService.#ctor(Microsoft.AspNetCore.SignalR.IHubContext{BlobCopy.API.Hubs.BlobCopyHub,BlobCopy.API.Hubs.IBlobCopyClient},Microsoft.Extensions.Logging.ILogger{BlobCopy.API.Services.ProgressNotificationService})">
+            <summary>
+            Initializes a new instance of ProgressNotificationService.
+            </summary>
+        </member>
+        <member name="T:BlobCopy.API.Services.TelemetryService">
+            <summary>
+            Service for tracking telemetry events and metrics related to blob copy operations.
+            Integrates with Azure Application Insights for distributed tracing and performance monitoring.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Services.TelemetryService.TrackCopyOperationStarted(BlobCopy.API.Models.BlobCopyOperation)">
+            <summary>
+            Tracks the start of a blob copy operation.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Services.TelemetryService.TrackProgressUpdate(BlobCopy.API.Models.ProgressUpdate)">
+            <summary>
+            Tracks progress updates for a blob copy operation.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Services.TelemetryService.TrackCopyOperationCompleted(BlobCopy.API.Models.BlobCopyOperation,System.TimeSpan)">
+            <summary>
+            Tracks successful completion of a blob copy operation.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Services.TelemetryService.TrackCopyOperationFailed(BlobCopy.API.Models.BlobCopyOperation,System.String,System.TimeSpan)">
+            <summary>
+            Tracks failure of a blob copy operation.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Services.TelemetryService.TrackCopyOperationCancelled(BlobCopy.API.Models.BlobCopyOperation,System.TimeSpan)">
+            <summary>
+            Tracks cancellation of a blob copy operation.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Services.TelemetryService.TrackValidationError(System.String,System.String,System.String)">
+            <summary>
+            Tracks validation errors.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Services.TelemetryService.TrackApiLatency(System.String,System.TimeSpan,System.Int32)">
+            <summary>
+            Tracks API endpoint latency.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Services.TelemetryService.TrackMetric(System.String,System.Double,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            Tracks custom metric for monitoring.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Services.TelemetryService.MaskUri(System.String)">
+            <summary>
+            Masks sensitive parts of a URI for logging.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Services.TelemetryService.CalculateThroughput(System.Int64,System.TimeSpan)">
+            <summary>
+            Calculates throughput in MB/s.
+            </summary>
+        </member>
+        <member name="T:Program">
+            <summary>
+            Auto-generated public partial Program class for top-level statement apps.
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -18,6 +18,9 @@ public static class BlobCopyServiceCollectionExtensions
         if (services == null)
             throw new ArgumentNullException(nameof(services));
 
+        // Register BlobClientFactory for creating blob clients (testable)
+        services.AddSingleton<IBlobClientFactory, BlobClientFactory>();
+
         // Register BlobValidationService for URI and blob existence validation
         // Singleton: Stateless service, no per-request data
         services.AddSingleton<BlobValidationService>();
@@ -35,6 +38,5 @@ public static class BlobCopyServiceCollectionExtensions
         services.AddSingleton<TelemetryService>();
 
         return services;
-    }
     }
 }

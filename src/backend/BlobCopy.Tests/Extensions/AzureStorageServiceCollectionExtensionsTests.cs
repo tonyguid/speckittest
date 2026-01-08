@@ -56,7 +56,7 @@ public class AzureStorageServiceCollectionExtensionsTests
     {
         // Arrange
         var services = new ServiceCollection();
-        var connectionString = "DefaultEndpointsProtocol=https;AccountName=test;AccountKey=key;EndpointSuffix=core.windows.net";
+        var connectionString = "UseDevelopmentStorage=true";
 
         // Act
         services.AddAzureStorageServicesWithConnectionString(connectionString);

@@ -62,6 +62,7 @@ public interface IBlobValidationService
 public class BlobValidationService : IBlobValidationService
 {
     private readonly BlobServiceClient _blobServiceClient;
+    private readonly IBlobClientFactory _blobClientFactory;
     private readonly ILogger<BlobValidationService> _logger;
 
     // Azure Blob Storage constraints
@@ -73,9 +74,11 @@ public class BlobValidationService : IBlobValidationService
     /// </summary>
     public BlobValidationService(
         BlobServiceClient blobServiceClient,
+        IBlobClientFactory blobClientFactory,
         ILogger<BlobValidationService> logger)
     {
         _blobServiceClient = blobServiceClient ?? throw new ArgumentNullException(nameof(blobServiceClient));
+        _blobClientFactory = blobClientFactory ?? throw new ArgumentNullException(nameof(blobClientFactory));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -152,7 +155,7 @@ public class BlobValidationService : IBlobValidationService
     {
         try
         {
-            var blob = new BlobClient(new Uri(sourceUri));
+            var blob = _blobClientFactory.CreateBlobClient(sourceUri);
             var properties = await blob.GetPropertiesAsync(cancellationToken: cancellationToken);
 
             // Check blob size

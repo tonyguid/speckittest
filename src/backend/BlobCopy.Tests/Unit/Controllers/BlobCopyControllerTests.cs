@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
+using Microsoft.Extensions.Logging;
 
 namespace BlobCopy.Tests.Unit.Controllers;
 
@@ -293,7 +294,7 @@ public class BlobCopyControllerTests
     public void GetStatus_ReturnsOk_WhenOperationExists()
     {
         var operationId = "op-123";
-        var operation = new BlobCopyOperation { Id = operationId, Status = BlobCopyStatus.Running };
+        var operation = new BlobCopyOperation { Id = operationId, Status = BlobCopyStatus.InProgress };
 
         _mockCopyService
             .Setup(x => x.GetOperationStatus(operationId))

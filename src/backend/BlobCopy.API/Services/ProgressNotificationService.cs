@@ -95,11 +95,11 @@ public class ProgressNotificationService : IProgressNotificationService
         try
         {
             _logger.LogDebug(
-                "Sending progress update for operation {OperationId}. Progress: {BytesCopied}/{TotalBytes} bytes ({Percentage:P})",
+                "Sending progress update for operation {OperationId}. Progress: {BytesTransferred}/{TotalBytes} bytes ({Percentage:P})",
                 operationId,
-                progress.BytesCopied,
+                progress.BytesTransferred,
                 progress.TotalBytes,
-                progress.TotalBytes > 0 ? (double)progress.BytesCopied / progress.TotalBytes : 0
+                progress.TotalBytes > 0 ? (double)progress.BytesTransferred / progress.TotalBytes : 0
             );
 
             // Send to all clients subscribed to this operation
@@ -126,8 +126,8 @@ public class ProgressNotificationService : IProgressNotificationService
 
         try
         {
-            var durationSeconds = operation.CompletedAt.HasValue && operation.StartedAt.HasValue
-                ? (operation.CompletedAt.Value - operation.StartedAt.Value).TotalSeconds
+            var durationSeconds = operation.CompletedAt != null
+                ? (operation.CompletedAt.Value - operation.StartedAt).TotalSeconds
                 : 0;
 
             var transferRateMbps = durationSeconds > 0 && operation.TotalBytes > 0
@@ -145,7 +145,13 @@ public class ProgressNotificationService : IProgressNotificationService
 
             await _hubContext.Clients
                 .Group(operationId)
-                .CopyCompleted(operation);
+                .CopyCompleted(
+                    operationId,
+                    operation.DestinationUri,
+                    operation.TotalBytes,
+                    (int)durationSeconds,
+                    operation.CompletedAt ?? DateTime.UtcNow
+                );
         }
         catch (Exception ex)
         {
@@ -166,19 +172,25 @@ public class ProgressNotificationService : IProgressNotificationService
 
         try
         {
-            var errorMessage = operation.Errors?.FirstOrDefault()?.Message ?? "Unknown error";
+            var errorMessage = operation.ErrorMessage ?? "Unknown error";
             _logger.LogError(
                 "Copy operation {OperationId} failed. Error: {ErrorMessage}. " +
-                "BytesCopied: {BytesCopied}/{TotalBytes}",
+                "BytesTransferred: {BytesTransferred}/{TotalBytes}",
                 operationId,
                 errorMessage,
-                operation.BytesCopied,
+                operation.BytesTransferred,
                 operation.TotalBytes
             );
 
             await _hubContext.Clients
                 .Group(operationId)
-                .CopyFailed(operation);
+                .CopyFailed(
+                    operationId,
+                    operation.ErrorCode ?? "UNKNOWN_ERROR",
+                    errorMessage,
+                    false,
+                    operation.CompletedAt ?? DateTime.UtcNow
+                );
         }
         catch (Exception ex)
         {
@@ -201,15 +213,20 @@ public class ProgressNotificationService : IProgressNotificationService
         {
             _logger.LogInformation(
                 "Copy operation {OperationId} was cancelled. " +
-                "BytesCopied: {BytesCopied}/{TotalBytes}",
+                "BytesTransferred: {BytesTransferred}/{TotalBytes}",
                 operationId,
-                operation.BytesCopied,
+                operation.BytesTransferred,
                 operation.TotalBytes
             );
 
             await _hubContext.Clients
                 .Group(operationId)
-                .OperationCancelled(operation);
+                .OperationCancelled(
+                    operationId,
+                    operation.BytesTransferred,
+                    operation.CompletedAt ?? DateTime.UtcNow,
+                    "Operation was cancelled by user"
+                );
         }
         catch (Exception ex)
         {

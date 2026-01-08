@@ -64,6 +64,7 @@ public interface IBlobCopyService
 public class BlobCopyService : IBlobCopyService
 {
     private readonly BlobServiceClient _blobServiceClient;
+    private readonly IBlobClientFactory _blobClientFactory;
     private readonly ILogger<BlobCopyService> _logger;
     
     // Dictionary to track in-memory operations
@@ -81,9 +82,11 @@ public class BlobCopyService : IBlobCopyService
     /// </summary>
     public BlobCopyService(
         BlobServiceClient blobServiceClient,
+        IBlobClientFactory blobClientFactory,
         ILogger<BlobCopyService> logger)
     {
         _blobServiceClient = blobServiceClient ?? throw new ArgumentNullException(nameof(blobServiceClient));
+        _blobClientFactory = blobClientFactory ?? throw new ArgumentNullException(nameof(blobClientFactory));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -107,18 +110,18 @@ public class BlobCopyService : IBlobCopyService
             DestinationUri = destinationUri,
             Status = BlobCopyStatus.Pending,
             StartedAt = DateTime.UtcNow,
-            BytesCopied = 0,
+            BytesTransferred = 0,
             TotalBytes = 0,
+            ErrorMessage = null,
             Errors = new List<ValidationError>()
         };
 
         // Get source blob size
         try
         {
-            var sourceBlob = new BlobClient(new Uri(sourceUri));
+            var sourceBlob = _blobClientFactory.CreateBlobClient(sourceUri);
             var properties = await sourceBlob.GetPropertiesAsync(cancellationToken: cancellationToken);
             operation.TotalBytes = properties.Value.ContentLength;
-            operation.SourceBlobName = sourceBlob.Name;
 
             _logger.LogInformation(
                 "Copy operation {OperationId} initialized. Source: {Source}, Destination: {Destination}, Size: {Size} bytes",
@@ -132,6 +135,8 @@ public class BlobCopyService : IBlobCopyService
         {
             _logger.LogError(ex, "Error initializing copy operation {OperationId}", operationId);
             operation.Status = BlobCopyStatus.Failed;
+            operation.ErrorMessage = ex.Message;
+            operation.ErrorCode = "INITIALIZATION_ERROR";
             operation.Errors.Add(new ValidationError
             {
                 Field = "sourceUri",
@@ -158,16 +163,16 @@ public class BlobCopyService : IBlobCopyService
 
         try
         {
-            operation.Status = BlobCopyStatus.Running;
+            operation.Status = BlobCopyStatus.InProgress;
             var stopwatch = Stopwatch.StartNew();
 
-            var sourceBlob = new BlobClient(new Uri(operation.SourceUri));
+            var sourceBlob = _blobClientFactory.CreateBlobClient(operation.SourceUri);
             var destUri = new Uri(operation.DestinationUri);
             var destContainerClient = _blobServiceClient.GetBlobContainerClient(
                 destUri.PathAndQuery.Split('/')[1]
             );
 
-            var destBlobName = operation.SourceBlobName ?? Path.GetFileName(sourceBlob.Name);
+            var destBlobName = Path.GetFileName(sourceBlob.Name);
             var destBlobClient = destContainerClient.GetBlobClient(destBlobName);
 
             // Get source blob properties
@@ -192,15 +197,15 @@ public class BlobCopyService : IBlobCopyService
                     cancellationToken: cancellationToken
                 );
 
-                operation.BytesCopied = operation.TotalBytes;
+                operation.BytesTransferred = operation.TotalBytes;
             }
 
             stopwatch.Stop();
 
             operation.Status = BlobCopyStatus.Completed;
             operation.CompletedAt = DateTime.UtcNow;
-            operation.DurationSeconds = (int)stopwatch.Elapsed.TotalSeconds;
 
+            var durationSeconds = (int)stopwatch.Elapsed.TotalSeconds;
             var transferRateMbps = operation.TotalBytes > 0
                 ? (operation.TotalBytes / (1024.0 * 1024.0)) / stopwatch.Elapsed.TotalSeconds
                 : 0;
@@ -208,14 +213,14 @@ public class BlobCopyService : IBlobCopyService
             _logger.LogInformation(
                 "Copy operation {OperationId} completed. Duration: {DurationSeconds}s, Rate: {TransferRateMbps} MB/s",
                 operation.Id,
-                operation.DurationSeconds,
+                durationSeconds,
                 transferRateMbps.ToString("F2")
             );
 
             // Final progress update
             if (onProgressUpdate != null)
             {
-                await onProgressUpdate(operation.BytesCopied, operation.TotalBytes);
+                await onProgressUpdate(operation.BytesTransferred, operation.TotalBytes);
             }
 
             lock (_operationsLock)
@@ -230,12 +235,8 @@ public class BlobCopyService : IBlobCopyService
             _logger.LogInformation(ex, "Copy operation {OperationId} was cancelled", operation.Id);
             operation.Status = BlobCopyStatus.Cancelled;
             operation.CompletedAt = DateTime.UtcNow;
-            operation.Errors.Add(new ValidationError
-            {
-                Field = "operation",
-                Message = "Copy operation was cancelled by user",
-                Code = "OPERATION_CANCELLED"
-            });
+            operation.ErrorMessage = "Copy operation was cancelled by user";
+            operation.ErrorCode = "OPERATION_CANCELLED";
 
             lock (_operationsLock)
             {
@@ -249,12 +250,8 @@ public class BlobCopyService : IBlobCopyService
             _logger.LogError(ex, "Error executing copy operation {OperationId}", operation.Id);
             operation.Status = BlobCopyStatus.Failed;
             operation.CompletedAt = DateTime.UtcNow;
-            operation.Errors.Add(new ValidationError
-            {
-                Field = "operation",
-                Message = ex.Message,
-                Code = "COPY_ERROR"
-            });
+            operation.ErrorMessage = ex.Message;
+            operation.ErrorCode = "COPY_ERROR";
 
             lock (_operationsLock)
             {
@@ -279,13 +276,24 @@ public class BlobCopyService : IBlobCopyService
                 var notFoundOp = new BlobCopyOperation
                 {
                     Id = operationId,
-                    Status = BlobCopyStatus.NotFound
+                    Status = BlobCopyStatus.NotFound,
+                    ErrorMessage = "Operation not found",
+                    ErrorCode = "NOT_FOUND",
+                    Errors = new List<ValidationError>
+                    {
+                        new ValidationError
+                        {
+                            Field = "operationId",
+                            Message = "Operation not found",
+                            Code = "NOT_FOUND"
+                        }
+                    }
                 };
                 _logger.LogWarning("Cancel requested for non-existent operation {OperationId}", operationId);
                 return notFoundOp;
             }
 
-            if (operation.Status == BlobCopyStatus.Running || operation.Status == BlobCopyStatus.Pending)
+            if (operation.Status == BlobCopyStatus.InProgress || operation.Status == BlobCopyStatus.Pending)
             {
                 operation.Status = BlobCopyStatus.Cancelled;
                 operation.CompletedAt = DateTime.UtcNow;
@@ -297,12 +305,17 @@ public class BlobCopyService : IBlobCopyService
                     "Cannot cancel completed operation {OperationId}",
                     operationId
                 );
-                operation.Errors.Add(new ValidationError
+                operation.ErrorMessage = "Cannot cancel a completed operation";
+                operation.ErrorCode = "INVALID_STATE_TRANSITION";
+                operation.Errors = new List<ValidationError>
                 {
-                    Field = "operation",
-                    Message = "Cannot cancel a completed operation",
-                    Code = "INVALID_STATE_TRANSITION"
-                });
+                    new ValidationError
+                    {
+                        Field = "status",
+                        Message = "Cannot cancel a completed operation",
+                        Code = "INVALID_STATE_TRANSITION"
+                    }
+                };
             }
 
             return operation;

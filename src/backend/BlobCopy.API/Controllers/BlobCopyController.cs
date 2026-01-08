@@ -1,5 +1,6 @@
 using BlobCopy.API.Models;
 using BlobCopy.API.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlobCopy.API.Controllers;
@@ -47,9 +48,9 @@ public class BlobCopyController : ControllerBase
     /// <response code="400">Validation failed with specific error details</response>
     /// <response code="500">Server error during validation</response>
     [HttpPost("validate")]
-    [ProduceResponseType(typeof(List<ValidationError>), StatusCodes.Status200OK)]
-    [ProduceResponseType(typeof(List<ValidationError>), StatusCodes.Status400BadRequest)]
-    [ProduceResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+    // [ProduceResponseType(typeof(List<ValidationError>), StatusCodes.Status200OK)]
+    // [ProduceResponseType(typeof(List<ValidationError>), StatusCodes.Status400BadRequest)]
+    // [ProduceResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> ValidateAsync(
         [FromBody] CopyRequest request,
         CancellationToken cancellationToken = default)
@@ -142,9 +143,9 @@ public class BlobCopyController : ControllerBase
     /// <response code="400">Invalid request parameters</response>
     /// <response code="500">Server error starting copy operation</response>
     [HttpPost("start")]
-    [ProduceResponseType(typeof(BlobCopyOperation), StatusCodes.Status201Created)]
-    [ProduceResponseType(typeof(List<ValidationError>), StatusCodes.Status400BadRequest)]
-    [ProduceResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+    // [ProduceResponseType(typeof(BlobCopyOperation), StatusCodes.Status201Created)]
+    // [ProduceResponseType(typeof(List<ValidationError>), StatusCodes.Status400BadRequest)]
+    // [ProduceResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> StartAsync(
         [FromBody] CopyRequest request,
         CancellationToken cancellationToken = default)
@@ -214,9 +215,9 @@ public class BlobCopyController : ControllerBase
                         {
                             var progressUpdate = new ProgressUpdate
                             {
-                                BytesCopied = bytesCopied,
+                                BytesTransferred = bytesCopied,
                                 TotalBytes = totalBytes,
-                                TimestampUtc = DateTime.UtcNow
+                                UpdatedAt = DateTime.UtcNow
                             };
                             await _progressService.NotifyProgressAsync(operationId, progressUpdate, cancellationToken);
                         },
@@ -231,18 +232,14 @@ public class BlobCopyController : ControllerBase
                 {
                     _logger.LogError(ex, "Error executing copy operation {OperationId}", operationId);
                     operation.Status = BlobCopyStatus.Failed;
-                    operation.Errors.Add(new ValidationError
-                    {
-                        Field = "operation",
-                        Message = ex.Message,
-                        Code = "COPY_EXECUTION_ERROR"
-                    });
+                    operation.ErrorMessage = ex.Message;
+                    operation.ErrorCode = "COPY_EXECUTION_ERROR";
                     await _progressService.NotifyFailureAsync(operationId, operation, cancellationToken);
                 }
             }, cancellationToken);
 #pragma warning restore CS4014
 
-            return CreatedAtAction(nameof(GetStatusAsync), new { id = operationId }, operation);
+            return CreatedAtAction(nameof(GetStatus), new { id = operationId }, operation);
         }
         catch (OperationCanceledException ex)
         {
@@ -285,9 +282,9 @@ public class BlobCopyController : ControllerBase
     /// <response code="404">Operation not found</response>
     /// <response code="500">Server error retrieving status</response>
     [HttpGet("status/{id}")]
-    [ProduceResponseType(typeof(BlobCopyOperation), StatusCodes.Status200OK)]
-    [ProduceResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProduceResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+    // [ProduceResponseType(typeof(BlobCopyOperation), StatusCodes.Status200OK)]
+    // [ProduceResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    // [ProduceResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public IActionResult GetStatus(string id)
     {
         try
@@ -357,9 +354,9 @@ public class BlobCopyController : ControllerBase
     /// <response code="404">Operation not found</response>
     /// <response code="500">Server error cancelling operation</response>
     [HttpPost("cancel/{id}")]
-    [ProduceResponseType(typeof(BlobCopyOperation), StatusCodes.Status200OK)]
-    [ProduceResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProduceResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+    // [ProduceResponseType(typeof(BlobCopyOperation), StatusCodes.Status200OK)]
+    // [ProduceResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    // [ProduceResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> CancelAsync(
         string id,
         CancellationToken cancellationToken = default)
@@ -437,8 +434,8 @@ public class BlobCopyController : ControllerBase
     /// <response code="200">Service is healthy</response>
     /// <response code="503">Service is unhealthy</response>
     [HttpGet("health")]
-    [ProduceResponseType(StatusCodes.Status200OK)]
-    [ProduceResponseType(StatusCodes.Status503ServiceUnavailable)]
+    // [ProduceResponseType(StatusCodes.Status200OK)]
+    // [ProduceResponseType(StatusCodes.Status503ServiceUnavailable)]
     public IActionResult Health()
     {
         try

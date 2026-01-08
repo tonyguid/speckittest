@@ -34,5 +34,11 @@ public enum BlobCopyStatus
     /// User cancelled the operation.
     /// May have transferred partial data depending on cancellation timing.
     /// </summary>
-    Cancelled = 5
+    Cancelled = 5,
+
+    /// <summary>
+    /// The requested operation or resource was not found.
+    /// Used for 404 responses.
+    /// </summary>
+    NotFound = 6
 }

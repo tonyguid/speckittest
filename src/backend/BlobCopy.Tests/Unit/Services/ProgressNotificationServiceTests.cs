@@ -4,6 +4,7 @@ using BlobCopy.API.Services;
 using Microsoft.AspNetCore.SignalR;
 using Moq;
 using Xunit;
+using Microsoft.Extensions.Logging;
 
 namespace BlobCopy.Tests.Unit.Services;
 
@@ -48,7 +49,7 @@ public class ProgressNotificationServiceTests
     [Fact]
     public async Task NotifyProgressAsync_ThrowsArgumentException_WhenOperationIdIsNull()
     {
-        var progress = new ProgressUpdate { BytesCopied = 0, TotalBytes = 100 };
+        var progress = new ProgressUpdate { BytesTransferred = 0, TotalBytes = 100 };
         
         var ex = await Assert.ThrowsAsync<ArgumentException>(() =>
             _service.NotifyProgressAsync(null, progress)
@@ -59,7 +60,7 @@ public class ProgressNotificationServiceTests
     [Fact]
     public async Task NotifyProgressAsync_ThrowsArgumentException_WhenOperationIdIsEmpty()
     {
-        var progress = new ProgressUpdate { BytesCopied = 0, TotalBytes = 100 };
+        var progress = new ProgressUpdate { BytesTransferred = 0, TotalBytes = 100 };
         
         var ex = await Assert.ThrowsAsync<ArgumentException>(() =>
             _service.NotifyProgressAsync("", progress)
@@ -81,13 +82,13 @@ public class ProgressNotificationServiceTests
         var operationId = "op-123";
         var progress = new ProgressUpdate 
         { 
-            BytesCopied = 1024,
+            BytesTransferred = 1024,
             TotalBytes = 2048,
             TimestampUtc = DateTime.UtcNow
         };
 
         var mockClients = new Mock<IHubClients<IBlobCopyClient>>();
-        var mockGroupClients = new Mock<IClientProxy>();
+        var mockGroupClients = new Mock<IBlobCopyClient>();
 
         _mockHubContext.Setup(x => x.Clients).Returns(mockClients.Object);
         mockClients.Setup(x => x.Group(operationId)).Returns(mockGroupClients.Object);
@@ -103,12 +104,12 @@ public class ProgressNotificationServiceTests
         var operationId = "op-123";
         var progress = new ProgressUpdate
         {
-            BytesCopied = 1024,
+            BytesTransferred = 1024,
             TotalBytes = 2048
         };
 
         var mockClients = new Mock<IHubClients<IBlobCopyClient>>();
-        var mockGroupClients = new Mock<IClientProxy>();
+        var mockGroupClients = new Mock<IBlobCopyClient>();
 
         _mockHubContext.Setup(x => x.Clients).Returns(mockClients.Object);
         mockClients.Setup(x => x.Group(operationId)).Returns(mockGroupClients.Object);
@@ -167,13 +168,13 @@ public class ProgressNotificationServiceTests
             Id = operationId,
             Status = BlobCopyStatus.Completed,
             TotalBytes = 2048,
-            BytesCopied = 2048,
+            BytesTransferred = 2048,
             StartedAt = DateTime.UtcNow.AddSeconds(-10),
             CompletedAt = DateTime.UtcNow
         };
 
         var mockClients = new Mock<IHubClients<IBlobCopyClient>>();
-        var mockGroupClients = new Mock<IClientProxy>();
+        var mockGroupClients = new Mock<IBlobCopyClient>();
 
         _mockHubContext.Setup(x => x.Clients).Returns(mockClients.Object);
         mockClients.Setup(x => x.Group(operationId)).Returns(mockGroupClients.Object);
@@ -197,7 +198,7 @@ public class ProgressNotificationServiceTests
         };
 
         var mockClients = new Mock<IHubClients<IBlobCopyClient>>();
-        var mockGroupClients = new Mock<IClientProxy>();
+        var mockGroupClients = new Mock<IBlobCopyClient>();
 
         _mockHubContext.Setup(x => x.Clients).Returns(mockClients.Object);
         mockClients.Setup(x => x.Group(operationId)).Returns(mockGroupClients.Object);
@@ -262,7 +263,7 @@ public class ProgressNotificationServiceTests
         };
 
         var mockClients = new Mock<IHubClients<IBlobCopyClient>>();
-        var mockGroupClients = new Mock<IClientProxy>();
+        var mockGroupClients = new Mock<IBlobCopyClient>();
 
         _mockHubContext.Setup(x => x.Clients).Returns(mockClients.Object);
         mockClients.Setup(x => x.Group(operationId)).Returns(mockGroupClients.Object);
@@ -287,7 +288,7 @@ public class ProgressNotificationServiceTests
         };
 
         var mockClients = new Mock<IHubClients<IBlobCopyClient>>();
-        var mockGroupClients = new Mock<IClientProxy>();
+        var mockGroupClients = new Mock<IBlobCopyClient>();
 
         _mockHubContext.Setup(x => x.Clients).Returns(mockClients.Object);
         mockClients.Setup(x => x.Group(operationId)).Returns(mockGroupClients.Object);
@@ -345,12 +346,12 @@ public class ProgressNotificationServiceTests
         {
             Id = operationId,
             Status = BlobCopyStatus.Cancelled,
-            BytesCopied = 1024,
+            BytesTransferred = 1024,
             TotalBytes = 2048
         };
 
         var mockClients = new Mock<IHubClients<IBlobCopyClient>>();
-        var mockGroupClients = new Mock<IClientProxy>();
+        var mockGroupClients = new Mock<IBlobCopyClient>();
 
         _mockHubContext.Setup(x => x.Clients).Returns(mockClients.Object);
         mockClients.Setup(x => x.Group(operationId)).Returns(mockGroupClients.Object);
@@ -368,12 +369,12 @@ public class ProgressNotificationServiceTests
         {
             Id = operationId,
             Status = BlobCopyStatus.Cancelled,
-            BytesCopied = 1024,
+            BytesTransferred = 1024,
             TotalBytes = 2048
         };
 
         var mockClients = new Mock<IHubClients<IBlobCopyClient>>();
-        var mockGroupClients = new Mock<IClientProxy>();
+        var mockGroupClients = new Mock<IBlobCopyClient>();
 
         _mockHubContext.Setup(x => x.Clients).Returns(mockClients.Object);
         mockClients.Setup(x => x.Group(operationId)).Returns(mockGroupClients.Object);
@@ -396,7 +397,7 @@ public class ProgressNotificationServiceTests
     [Fact]
     public async Task NotifyProgressAsync_TreatsWhitespaceAsEmpty()
     {
-        var progress = new ProgressUpdate { BytesCopied = 0, TotalBytes = 100 };
+        var progress = new ProgressUpdate { BytesTransferred = 0, TotalBytes = 100 };
         
         var ex = await Assert.ThrowsAsync<ArgumentException>(() =>
             _service.NotifyProgressAsync("   ", progress)

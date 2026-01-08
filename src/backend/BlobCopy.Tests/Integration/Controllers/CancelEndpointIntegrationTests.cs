@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Xunit;
+using Microsoft.Extensions.Logging;
 
 namespace BlobCopy.Tests.Integration.Controllers;
 
@@ -47,7 +48,7 @@ public class CancelEndpointIntegrationTests
             DestinationUri = "https://storage.blob.core.windows.net/dest/file.vhd",
             StartedAt = DateTime.UtcNow.AddSeconds(-5),
             CompletedAt = DateTime.UtcNow,
-            BytesCopied = 0,
+            BytesTransferred = 0,
             TotalBytes = 1024 * 1024 * 100
         };
 
@@ -74,7 +75,7 @@ public class CancelEndpointIntegrationTests
             DestinationUri = "https://storage.blob.core.windows.net/dest/file.vhd",
             StartedAt = DateTime.UtcNow.AddSeconds(-60),
             CompletedAt = DateTime.UtcNow,
-            BytesCopied = 1024 * 1024 * 50,
+            BytesTransferred = 1024 * 1024 * 50,
             TotalBytes = 1024 * 1024 * 100
         };
 
@@ -102,7 +103,7 @@ public class CancelEndpointIntegrationTests
             DestinationUri = "https://storage.blob.core.windows.net/dest/file.vhd",
             StartedAt = DateTime.UtcNow.AddSeconds(-120),
             CompletedAt = DateTime.UtcNow.AddSeconds(-30),
-            BytesCopied = 1024 * 1024 * 100,
+            BytesTransferred = 1024 * 1024 * 100,
             TotalBytes = 1024 * 1024 * 100,
             Errors = new List<ValidationError>
             {
@@ -188,7 +189,7 @@ public class CancelEndpointIntegrationTests
             Status = BlobCopyStatus.Cancelled,
             SourceUri = "https://storage.blob.core.windows.net/source/file.vhd",
             DestinationUri = "https://storage.blob.core.windows.net/dest/file.vhd",
-            BytesCopied = 1024 * 512,
+            BytesTransferred = 1024 * 512,
             TotalBytes = 1024 * 1024 * 100
         };
 
@@ -208,7 +209,7 @@ public class CancelEndpointIntegrationTests
     public async Task Cancel_WithPartialProgress_PreservesProgress()
     {
         var operationId = "op-partial-cancel";
-        var bytesCopied = 1024 * 1024 * 75;
+        var BytesTransferred = 1024 * 1024 * 75;
         var totalBytes = 1024 * 1024 * 100;
         var operation = new BlobCopyOperation
         {
@@ -218,7 +219,7 @@ public class CancelEndpointIntegrationTests
             DestinationUri = "https://storage.blob.core.windows.net/dest/file.vhd",
             StartedAt = DateTime.UtcNow.AddSeconds(-45),
             CompletedAt = DateTime.UtcNow,
-            BytesCopied = bytesCopied,
+            BytesTransferred = BytesTransferred,
             TotalBytes = totalBytes
         };
 
@@ -230,7 +231,7 @@ public class CancelEndpointIntegrationTests
 
         var okResult = Assert.IsType<OkObjectResult>(result);
         var cancelledOp = Assert.IsType<BlobCopyOperation>(okResult.Value);
-        Assert.Equal(bytesCopied, cancelledOp.BytesCopied);
+        Assert.Equal(BytesTransferred, cancelledOp.BytesTransferred);
         Assert.Equal(totalBytes, cancelledOp.TotalBytes);
     }
 
