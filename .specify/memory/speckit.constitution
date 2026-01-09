@@ -61,7 +61,7 @@ Principles
 
 8. Infrastructure & Cloud Platform
 - Cloud provider: all infrastructure, services, and deployments must use Azure as the primary cloud platform.
-- Infrastructure as Code (IaC): all infrastructure must be defined, versioned, and deployed using Infrastructure-as-Code (Bicep or Terraform). IaC definitions must live in source control, be peer-reviewed, and be deployed via CI/CD pipelines; manual changes to production resources are prohibited except via a documented emergency process.
+- Infrastructure as Code (IaC): all infrastructure must be defined, versioned, and deployed using Infrastructure-as-Code (Terraform). IaC definitions must live in source control, be peer-reviewed, and be deployed via CI/CD pipelines; manual changes to production resources are prohibited except via a documented emergency process.
 - Service tiers: prefer managed Azure services (App Service, Azure SQL Database, Azure Cosmos DB, Azure Functions) over raw VMs where cost-effective and appropriate.
 - Compliance and security: leverage Azure security features (managed identity, Key Vault, network security groups) and comply with relevant compliance standards for data residency and encryption.
 
