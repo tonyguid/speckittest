@@ -79,9 +79,11 @@ describe('ApiClient', () => {
         sourceUri: 'https://account.blob.core.windows.net/source/blob',
         destinationUri: 'https://account.blob.core.windows.net/dest/blob',
         status: BlobCopyStatus.Pending,
-        bytesCopied: 0,
+        progressPercentage: 0,
+        bytesTransferred: 0,
         totalBytes: 1000,
-        createdAt: new Date().toISOString(),
+        startedAt: new Date().toISOString(),
+        correlationId: 'corr-123',
       };
 
       mockAxios.create.mockReturnValue({
@@ -129,9 +131,11 @@ describe('ApiClient', () => {
         sourceUri: 'https://account.blob.core.windows.net/source/blob',
         destinationUri: 'https://account.blob.core.windows.net/dest/blob',
         status: BlobCopyStatus.Running,
-        bytesCopied: 500,
+        progressPercentage: 50,
+        bytesTransferred: 500,
         totalBytes: 1000,
-        createdAt: new Date().toISOString(),
+        startedAt: new Date().toISOString(),
+        correlationId: 'corr-123',
       };
 
       mockAxios.create.mockReturnValue({
@@ -169,10 +173,12 @@ describe('ApiClient', () => {
         sourceUri: 'https://account.blob.core.windows.net/source/blob',
         destinationUri: 'https://account.blob.core.windows.net/dest/blob',
         status: BlobCopyStatus.Cancelled,
-        bytesCopied: 500,
+        progressPercentage: 30,
+        bytesTransferred: 300,
         totalBytes: 1000,
-        createdAt: new Date().toISOString(),
+        startedAt: new Date().toISOString(),
         completedAt: new Date().toISOString(),
+        correlationId: 'corr-123',
       };
 
       mockAxios.create.mockReturnValue({
