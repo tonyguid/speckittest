@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BlobCopy.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+06027a7ffebff2ab26595e8f2816392245ac8459")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+230a81019d543f3f3fd586c9aee33b2a48a05fe7")]
 [assembly: System.Reflection.AssemblyProductAttribute("BlobCopy.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BlobCopy.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
