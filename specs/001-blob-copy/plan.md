@@ -156,7 +156,7 @@ src/
 │   │   │   │   └── uriValidationService.ts      # Client-side validation
 │   │   │   ├── hooks/
 │   │   │   │   ├── useBlobCopy.ts               # Custom hook for copy operation
-│   │   │   │   └── useProgress.ts               # Custom hook for progress tracking
+│   │   │   │   └── useSignalR.ts                # Custom hook for SignalR connection
 │   │   │   ├── types/
 │   │   │   │   └── index.ts                     # TypeScript interfaces
 │   │   │   ├── App.tsx
@@ -206,33 +206,78 @@ No constitution violations requiring justification. Architecture aligns with all
 | Managed identity for blob access | Eliminates credentials from code, aligns with security principle | Connection string in appsettings would violate security principle 10 |
 | Separate backend/frontend projects | Allows independent deployment and testing | Monolithic SPA would violate single responsibility principle |
 | Azure Blob Storage API streaming | Handles large blobs without loading entire file in memory | Buffering entire blob would violate resource efficiency constraint |
+| Azure API Management deferred (MVP exception) | MVP scope limits to direct App Service exposure; APIM adds complexity without immediate benefit for single-user scenario | Full APIM integration adds 2-3 days; defer to v1.1 when multi-tenant or rate limiting needed. Constitution Principle 7 exception documented per governance process. |
 
 ---
 
 ## Phase 0: Research & Clarification
 
-### Outstanding NEEDS CLARIFICATION Items (from spec)
+### Resolved Clarifications (Session 2026-01-13)
 
-1. **FR-009**: Destination blob already exists behavior
-   - **Clarification**: When user attempts to copy to a URI where a blob already exists, should the system:
-     - **Decision**: Prompt user with three options: (a) Overwrite, (b) Cancel, (c) Choose new destination
-     - **Rationale**: Prevents accidental data loss; gives user control
-     - **Implementation**: Add checkbox/dialog in React form before initiating copy
+All clarification questions have been resolved. The following decisions guide implementation:
 
-2. **FR-010**: Authentication method
-   - **Decision**: Azure Entra ID (managed identity) for backend service principal, with user sign-in via Entra ID in frontend SPA
-   - **Rationale**: Aligns with constitution principle 10; no credentials in code; leverages Azure native auth
-   - **Implementation**: Use Azure.Identity.DefaultAzureCredential for backend, MSAL.js for frontend
+1. **FR-009: Destination blob already exists behavior**
+   - **Question**: When a blob already exists at the destination URI, what should the system do?
+   - **Decision**: Prompt user to confirm overwrite, cancel, or rename
+   - **Rationale**: Prevents accidental data loss; gives user control over conflict resolution
+   - **Implementation**: 
+     - Backend: Check for existing blob before copy operation
+     - Frontend: Display modal dialog with three action buttons: "Overwrite", "Cancel", "Rename"
+     - If rename selected, allow user to enter new destination blob name
+     - Store user's choice in operation context for audit logging
 
-3. **Timeout handling** (Edge Case):
-   - **Decision**: Set blob copy timeout to 30 minutes for large blobs; if exceeded, return timeout error with retry button
-   - **Rationale**: Reasonable default for multi-gigabyte copies; matches Azure SDK defaults
-   - **Implementation**: Configure HttpClientTimeout and BlobClient timeout in backend config
+2. **FR-010: Authentication method**
+   - **Question**: How should users authenticate to access Azure Blob Storage?
+   - **Decision**: Azure Entra ID with DefaultAzureCredential
+   - **Rationale**: Aligns with constitution principle 10; no credentials in code; leverages Azure native auth; supports managed identity, Azure CLI, environment variables
+   - **Implementation**: 
+     - Backend: Use Azure.Identity.DefaultAzureCredential for all BlobServiceClient instances
+     - Frontend: Use MSAL.js for user sign-in via Entra ID
+     - No connection strings or access keys in configuration files
+     - Document authentication setup in quickstart.md
 
-4. **Identical source/destination** (Edge Case):
-   - **Decision**: Validate on form submit and display error: "Source and destination URIs must be different"
-   - **Rationale**: Prevents no-op operations and user confusion
-   - **Implementation**: Add validation check in BlobValidationService
+3. **FR-012: Maximum blob size support**
+   - **Question**: What is the maximum blob size the system should support?
+   - **Decision**: 5 TB (Azure block blob limit)
+   - **Rationale**: Aligns with Azure Blob Storage block blob maximum size limit; Azure SDK handles chunking automatically
+   - **Implementation**:
+     - Use Azure SDK's built-in chunking and retry mechanisms
+     - Configure BlobUploadOptions with optimal chunk size (100 MB recommended)
+     - Progress tracking reports percentage based on total blob size
+     - No client-side size validation needed (Azure enforces limit)
+     - Document large file handling in data-model.md
+
+4. **FR-013: Copy operation timeout handling**
+   - **Question**: How should the system handle copy operation timeouts?
+   - **Decision**: Notify user and offer retry option
+   - **Rationale**: Long-running operations may timeout due to network issues or service limits; user should have control to retry
+   - **Implementation**: 
+     - Set blob copy timeout to 30 minutes for large blobs
+     - Configure HttpClient.Timeout and BlobClient request timeout in backend config
+     - On timeout exception, return error with specific timeout code: COPY_TIMEOUT
+     - Frontend displays error message: "Copy operation timed out. This may occur with very large files or slow network connections."
+     - Display "Retry" button to restart operation with same parameters
+
+5. **FR-014: Blob names with special characters**
+   - **Question**: How should the system handle blob names with special characters or non-ASCII characters?
+   - **Decision**: Allow per Azure rules, validate prohibited chars
+   - **Rationale**: Azure supports Unicode characters in blob names; only specific characters are prohibited
+   - **Implementation**:
+     - Backend validation: Check against Azure prohibited characters: \ / : * ? " < > |
+     - Allow all other Unicode characters including spaces, international characters
+     - Display validation error: "Blob name contains invalid characters: {list}. The following characters are not allowed: \ / : * ? \" < > |"
+     - Reference: https://docs.microsoft.com/azure/storage/blobs/storage-blobs-naming
+     - Add unit tests for edge cases (emoji, Chinese characters, accented letters)
+
+6. **Identical source/destination validation**
+   - **Question**: Should system prevent copying blob to itself?
+   - **Decision**: Validate on form submit and display error: "Source and destination URIs cannot be identical"
+   - **Rationale**: Prevents no-op operations, saves unnecessary API calls, improves user experience, prevents potential errors
+   - **Implementation**:
+     - Frontend: Add case-insensitive URI comparison in CopyForm component before API submission
+     - Backend: Add validation check in BlobValidationService (defense-in-depth security)
+     - Normalize URIs before comparison (trim whitespace, lowercase, remove trailing slashes)
+     - Error code: IDENTICAL_URIS
 
 ### Research Output
 

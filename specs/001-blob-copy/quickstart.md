@@ -39,13 +39,13 @@ git checkout 001-blob-copy
 
 #### Backend (.NET)
 ```bash
-cd backend
+cd src/backend/BlobCopy.API
 dotnet restore
 ```
 
 #### Frontend (Node.js)
 ```bash
-cd ../frontend
+cd src/frontend
 npm install
 ```
 
@@ -140,7 +140,7 @@ az storage container create \
 
 ### 2.3 Configuration Files
 
-#### Backend: `backend/appsettings.Development.json`
+#### Backend: `src/backend/BlobCopy.API/appsettings.Development.json`
 ```json
 {
   "Logging": {
@@ -170,11 +170,10 @@ az storage container create \
 }
 ```
 
-#### Frontend: `frontend/.env.local`
+#### Frontend: `src/frontend/.env.local`
 ```bash
-REACT_APP_API_BASE_URL=http://localhost:5000
-REACT_APP_SIGNALR_HUB_URL=ws://localhost:5000/signalr/blob-copy-hub
-REACT_APP_AUTH_MSAL_CONFIG={...}
+VITE_API_BASE_URL=http://localhost:5000
+VITE_SIGNALR_HUB_URL=ws://localhost:5000/blobcopyhub
 ```
 
 ---
@@ -184,7 +183,7 @@ REACT_APP_AUTH_MSAL_CONFIG={...}
 ### 3.1 Using dotnet CLI
 
 ```bash
-cd backend
+cd src/backend/BlobCopy.API
 dotnet run
 ```
 
@@ -198,7 +197,7 @@ info: Microsoft.Hosting.Lifetime[0]
 
 ### 3.2 Using Visual Studio Code
 
-1. Open backend folder in VS Code
+1. Open `src/backend/BlobCopy.API` folder in VS Code
 2. Install "C# Dev Kit" extension
 3. Press `F5` or go to Run → Start Debugging
 
@@ -221,15 +220,16 @@ curl http://localhost:5000/api/v1/health
 ### 4.1 Development Server
 
 ```bash
-cd frontend
-npm start
+cd src/frontend
+npm run dev
 ```
 
 Expected output:
 ```
-Compiled successfully!
-You can now view blob-copy-ui in the browser.
-Local: http://localhost:3000
+  VITE v5.x.x  ready in xxx ms
+
+  ➜  Local:   http://localhost:3000/
+  ➜  Network: use --host to expose
 ```
 
 ### 4.2 Build for Production
@@ -237,8 +237,8 @@ Local: http://localhost:3000
 ```bash
 npm run build
 
-# Creates optimized build in ./build/
-ls -la build/
+# Creates optimized build in ./dist/
+ls -la dist/
 ```
 
 ---
@@ -268,6 +268,13 @@ ls -la build/
    - Watch progress bar update
    - See success message
 
+   **Test identical URI validation**:
+   - Enter the same URI in both source and destination fields: `https://blobcopydevXXXX.blob.core.windows.net/source-blobs/testblob.txt`
+   - Expected: Error message displays "Source and destination URIs cannot be identical"
+   - Expected: Copy button is disabled or form prevents submission
+   - Test case-insensitive: Try `https://BLOBCOPYDEVXXXX.blob.core.windows.net/SOURCE-BLOBS/testblob.txt` in destination
+   - Expected: Same error appears (validation is case-insensitive)
+
 4. **Verify destination blob**:
    ```bash
    az storage blob show \
@@ -282,7 +289,7 @@ ls -la build/
 
 #### Backend (xUnit)
 ```bash
-cd backend
+cd src/backend/BlobCopy.Tests
 dotnet test
 
 # Run with coverage
@@ -296,26 +303,26 @@ Passed!  - Failed: 0, Passed: 42, Skipped: 0
 
 #### Frontend (Vitest)
 ```bash
-cd frontend
+cd src/frontend
 npm test
 
 # Watch mode
-npm test -- --watch
+npm run test:watch
 
 # Coverage
-npm test -- --coverage
+npm run test:coverage
 ```
 
 ---
 
-### 5.3 Running Integration Tests (Playwright)
+### 5.3 Running E2E Tests (Playwright)
 
 ```bash
-cd frontend
+cd src/frontend
 npm run test:e2e
 
 # Or specific test file
-npx playwright test tests/e2e/blob-copy.spec.ts
+npx playwright test e2e/blob-copy.spec.ts
 
 # Debug mode
 npx playwright test --debug
@@ -329,59 +336,75 @@ npx playwright test --ui
 ## 6. Project Structure
 
 ```
-blob-copy-feature/
-├── backend/                          # C# .NET 10 API
-│   ├── BlobCopyAPI/
-│   │   ├── Controllers/
-│   │   │   └── BlobCopyController.cs
-│   │   ├── Services/
-│   │   │   ├── BlobCopyService.cs
-│   │   │   ├── BlobValidationService.cs
-│   │   │   └── ProgressNotificationService.cs
-│   │   ├── Models/
-│   │   │   ├── BlobCopyOperation.cs
-│   │   │   ├── BlobCopyStatus.cs
-│   │   │   └── ValidationError.cs
-│   │   ├── Hubs/
-│   │   │   └── BlobCopyHub.cs
-│   │   ├── appsettings.json
-│   │   └── Program.cs
-│   ├── BlobCopyAPI.Tests/
-│   │   ├── Services/
-│   │   │   ├── BlobCopyServiceTests.cs
-│   │   │   └── BlobValidationServiceTests.cs
-│   │   └── Controllers/
-│   │       └── BlobCopyControllerTests.cs
-│   └── blob-copy-backend.csproj
-│
-├── frontend/                         # React.js 18+ SPA
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── BlobCopyForm.tsx
-│   │   │   ├── ProgressDisplay.tsx
-│   │   │   └── ResultMessage.tsx
-│   │   ├── hooks/
-│   │   │   ├── useBlobCopy.ts
-│   │   │   └── useSignalR.ts
-│   │   ├── services/
-│   │   │   ├── blobCopyService.ts
-│   │   │   └── signalRService.ts
-│   │   ├── types/
-│   │   │   └── blobCopy.ts
-│   │   ├── App.tsx
-│   │   └── index.tsx
-│   ├── src/__tests__/
-│   │   ├── components/
-│   │   │   └── BlobCopyForm.test.tsx
-│   │   └── hooks/
-│   │       └── useBlobCopy.test.ts
-│   ├── tests/e2e/
-│   │   ├── blob-copy.spec.ts
-│   │   └── error-handling.spec.ts
-│   ├── package.json
-│   ├── vite.config.ts
-│   ├── vitest.config.ts
-│   └── playwright.config.ts
+my-project/
+├── src/
+│   ├── backend/                      # C# .NET 10 API
+│   │   ├── BlobCopy.API/
+│   │   │   ├── Controllers/
+│   │   │   │   └── BlobCopyController.cs
+│   │   │   ├── Services/
+│   │   │   │   ├── BlobCopyService.cs
+│   │   │   │   ├── BlobValidationService.cs
+│   │   │   │   ├── ProgressNotificationService.cs
+│   │   │   │   └── IBlobClientFactory.cs
+│   │   │   ├── Models/
+│   │   │   │   ├── BlobCopyOperation.cs
+│   │   │   │   ├── BlobCopyStatus.cs
+│   │   │   │   ├── CopyRequest.cs
+│   │   │   │   ├── ValidationError.cs
+│   │   │   │   └── ConflictResponse.cs
+│   │   │   ├── Hubs/
+│   │   │   │   └── BlobCopyHub.cs
+│   │   │   ├── Middleware/
+│   │   │   │   └── ErrorHandlingMiddleware.cs
+│   │   │   ├── appsettings.json
+│   │   │   └── Program.cs
+│   │   └── BlobCopy.Tests/
+│   │       ├── Unit/
+│   │       │   ├── Services/
+│   │       │   │   ├── BlobCopyServiceTests.cs
+│   │       │   │   └── BlobValidationServiceTests.cs
+│   │       │   ├── Controllers/
+│   │       │   │   └── BlobCopyControllerTests.cs
+│   │       │   └── ApiContractTests.cs
+│   │       └── Integration/
+│   │           └── Controllers/
+│   │
+│   └── frontend/                     # React 18+ SPA (Vite)
+│       ├── src/
+│       │   ├── components/
+│       │   │   ├── CopyForm.tsx
+│       │   │   ├── ProgressDisplay.tsx
+│       │   │   ├── ResultDisplay.tsx
+│       │   │   └── OverwriteConfirmDialog.tsx
+│       │   ├── hooks/
+│       │   │   ├── useCopyOperation.ts
+│       │   │   └── useProgress.ts
+│       │   ├── services/
+│       │   │   ├── apiClient.ts
+│       │   │   ├── signalRClient.ts
+│       │   │   ├── uriValidationService.ts
+│       │   │   └── applicationInsightsService.ts
+│       │   ├── types.ts
+│       │   ├── App.tsx
+│       │   └── main.tsx
+│       ├── src/__tests__/
+│       │   ├── components/
+│       │   │   ├── CopyForm.test.tsx
+│       │   │   ├── ProgressDisplay.test.tsx
+│       │   │   └── OverwriteConfirmDialog.test.tsx
+│       │   ├── hooks/
+│       │   │   └── useCopyOperation.test.ts
+│       │   └── services/
+│       │       ├── apiClient.test.ts
+│       │       └── uriValidationService.test.ts
+│       ├── e2e/
+│       │   ├── blob-copy.spec.ts
+│       │   └── blob-copy-conflict.spec.ts
+│       ├── package.json
+│       ├── vite.config.ts
+│       ├── tsconfig.json
+│       └── playwright.config.ts
 │
 ├── specs/
 │   └── 001-blob-copy/
@@ -390,18 +413,25 @@ blob-copy-feature/
 │       ├── data-model.md             # Entity definitions
 │       ├── quickstart.md             # This file
 │       ├── contracts/
-│       │   ├── api.contracts.md      # OpenAPI spec
+│       │   ├── api.openapi.yaml      # OpenAPI spec
+│       │   ├── api.contracts.md      # API documentation
 │       │   └── signalr.events.md     # WebSocket events
 │       └── tasks.md                  # Development task breakdown
 │
+├── infra/
+│   └── terraform/                    # Infrastructure as Code
+│       └── main.tf
+│
 ├── .specify/
 │   ├── memory/
-│   │   └── speckit.constitution      # Project governance
+│   │   └── constitution.md           # Project governance
 │   └── templates/
-│       └── ...
 │
-├── docker-compose.yml                # Local dev environment
-├── .env.example
+├── .github/
+│   └── workflows/
+│       └── ci.yml                    # CI/CD workflow
+│
+├── .gitignore
 └── README.md
 ```
 
@@ -424,14 +454,14 @@ az storage blob upload \
 ### 7.2 Debug Backend
 
 #### Visual Studio Code
-1. Open backend folder
+1. Open `src/backend/BlobCopy.API` folder
 2. Press `F5` to start debugging
 3. Set breakpoints (click left margin)
 4. Make API request to hit breakpoint
 
 #### Command Line
 ```bash
-cd backend
+cd src/backend/BlobCopy.API
 dotnet run --configuration Debug
 ```
 
@@ -446,19 +476,20 @@ dotnet run --configuration Debug
 ```bash
 # In VS Code, open debug terminal:
 # Select "JavaScript Debug Terminal"
-npm start
+cd src/frontend
+npm run dev
 ```
 
 ### 7.4 Check Test Coverage
 
 ```bash
 # Backend coverage
-cd backend
+cd src/backend/BlobCopy.Tests
 dotnet test /p:CollectCoverage=true /p:CoverageFormat=lcov
 
 # Frontend coverage
-cd ../frontend
-npm test -- --coverage
+cd src/frontend
+npm run test:coverage
 ```
 
 ---
@@ -508,13 +539,13 @@ dotnet new global.json  # Create global.json for .NET 10
 
 | Variable | Backend | Frontend | Description |
 |----------|---------|----------|-------------|
-| `ASPNETCORE_URLS` | ✅ | | Backend port (default: http://localhost:5000) |
-| `ASPNETCORE_ENVIRONMENT` | ✅ | | Set to `Development` for local dev |
-| `Azure__Storage__ConnectionString` | ✅ | | Azure Storage connection string |
-| `Azure__Authentication__TenantId` | ✅ | | Entra ID tenant ID |
-| `Azure__Authentication__ClientId` | ✅ | | Application ID |
-| `REACT_APP_API_BASE_URL` | | ✅ | Backend API base URL |
-| `REACT_APP_SIGNALR_HUB_URL` | | ✅ | SignalR hub WebSocket URL |
+| `ASPNETCORE_URLS` | Yes | | Backend port (default: http://localhost:5000) |
+| `ASPNETCORE_ENVIRONMENT` | Yes | | Set to `Development` for local dev |
+| `Azure__Storage__ConnectionString` | Yes | | Azure Storage connection string |
+| `Azure__Authentication__TenantId` | Yes | | Entra ID tenant ID |
+| `Azure__Authentication__ClientId` | Yes | | Application ID |
+| `VITE_API_BASE_URL` | | Yes | Backend API base URL |
+| `VITE_SIGNALR_HUB_URL` | | Yes | SignalR hub WebSocket URL |
 
 ---
 

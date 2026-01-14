@@ -1,37 +1,49 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { BlobCopyOperation, BlobCopyStatus } from '../types';
-import { apiClient } from './apiClient';
-import { signalRClient, SignalRCallbacks } from './signalRClient';
+import { BlobCopyOperation, BlobCopyStatus, ConflictInfo } from '../types';
+import { apiClient, ConflictError } from '../services/apiClient';
+import { signalRClient } from '../services/signalRClient';
 import { appInsightsService } from '../services/applicationInsightsService';
 
 /**
  * Hook for managing a blob copy operation lifecycle.
- * Handles starting, tracking, and cancelling copy operations.
+ * Handles starting, tracking, cancelling, and conflict resolution.
  */
 export function useCopyOperation() {
   const [operation, setOperation] = useState<BlobCopyOperation | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [conflictInfo, setConflictInfo] = useState<ConflictInfo | null>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const signalRSubscribedRef = useRef<string | null>(null);
+  const pendingCopyRef = useRef<{ sourceUri: string; destinationUri: string } | null>(null);
 
   /**
    * Starts a new copy operation.
    *
    * @param sourceUri - Source blob URI
    * @param destinationUri - Destination blob URI
+   * @param options - Additional options (overwriteIfExists, newDestinationName)
    * @param useWebSocket - Whether to use WebSocket for real-time updates (default: true)
    */
   const startOperation = useCallback(
-    async (sourceUri: string, destinationUri: string, useWebSocket = true) => {
+    async (
+      sourceUri: string,
+      destinationUri: string,
+      options: { overwriteIfExists?: boolean; newDestinationName?: string } = {},
+      useWebSocket = true
+    ) => {
       setIsLoading(true);
       setError(null);
+      setConflictInfo(null);
+      pendingCopyRef.current = { sourceUri, destinationUri };
 
       try {
         // Start the copy operation
         const op = await apiClient.startCopy({
           sourceUri,
           destinationUri,
+          overwriteIfExists: options.overwriteIfExists,
+          newDestinationName: options.newDestinationName,
         });
 
         setOperation(op);
@@ -105,14 +117,51 @@ export function useCopyOperation() {
           startPolling(op.id);
         }
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : String(err);
-        setError(errorMessage);
+        if (err instanceof ConflictError) {
+          // Destination blob exists - show conflict dialog
+          setConflictInfo(err.conflictInfo);
+          appInsightsService.trackException(err);
+        } else {
+          const errorMessage = err instanceof Error ? err.message : String(err);
+          setError(errorMessage);
+        }
       } finally {
         setIsLoading(false);
       }
     },
     []
   );
+
+  /**
+   * Resolves a conflict by retrying with overwrite.
+   */
+  const resolveConflictWithOverwrite = useCallback(async () => {
+    if (!pendingCopyRef.current) return;
+    const { sourceUri, destinationUri } = pendingCopyRef.current;
+    setConflictInfo(null);
+    await startOperation(sourceUri, destinationUri, { overwriteIfExists: true });
+  }, [startOperation]);
+
+  /**
+   * Resolves a conflict by using a new destination name.
+   */
+  const resolveConflictWithRename = useCallback(
+    async (newName: string) => {
+      if (!pendingCopyRef.current) return;
+      const { sourceUri, destinationUri } = pendingCopyRef.current;
+      setConflictInfo(null);
+      await startOperation(sourceUri, destinationUri, { newDestinationName: newName });
+    },
+    [startOperation]
+  );
+
+  /**
+   * Cancels conflict resolution and clears the pending copy.
+   */
+  const cancelConflict = useCallback(() => {
+    setConflictInfo(null);
+    pendingCopyRef.current = null;
+  }, []);
 
   /**
    * Cancels the current operation.
@@ -215,8 +264,12 @@ export function useCopyOperation() {
     operation,
     isLoading,
     error,
+    conflictInfo,
     startOperation,
     cancelOperation,
     reset,
+    resolveConflictWithOverwrite,
+    resolveConflictWithRename,
+    cancelConflict,
   };
 }

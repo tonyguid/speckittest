@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BlobCopy.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+230a81019d543f3f3fd586c9aee33b2a48a05fe7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c405d08f7b109489c5c254931b434489ca785356")]
 [assembly: System.Reflection.AssemblyProductAttribute("BlobCopy.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BlobCopy.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

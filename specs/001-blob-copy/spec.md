@@ -5,6 +5,16 @@
 **Status**: Draft  
 **Input**: User description: "User enters a source blob storage URI and destination blob storage URI. The blob at the source is copied to the destination. Progress should be shown to the user, as well as success or failure indication."
 
+## Clarifications
+
+### Session 2026-01-13
+
+- Q: When a blob already exists at the destination URI, what should the system do? → A: Prompt user to confirm overwrite, cancel, or rename
+- Q: How should users authenticate to access Azure Blob Storage? → A: Azure Entra ID with DefaultAzureCredential
+- Q: What is the maximum blob size the system should support? → A: 5 TB (Azure block blob limit)
+- Q: How should the system handle copy operation timeouts? → A: Notify user and offer retry option
+- Q: How should the system handle blob names with special characters or non-ASCII characters? → A: Allow per Azure rules, validate prohibited chars
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Copy Blob with Progress Tracking (Priority: P1)
@@ -54,16 +64,17 @@ The system validates the blob URIs provided by the user before attempting the co
 1. **Given** the user provides a URI that is not in the correct blob storage format, **When** the user submits the form, **Then** the system displays a validation error indicating the URI format is invalid
 2. **Given** the user provides an empty or missing URI field, **When** the user attempts to proceed, **Then** the system displays a validation error indicating the field is required
 3. **Given** the user provides properly formatted URIs with correct protocol and domain, **When** the user submits the form, **Then** the system accepts the input and proceeds with the copy operation
+4. **Given** the user provides the same URI for both source and destination fields, **When** the user attempts to submit, **Then** the system displays a validation error indicating the URIs cannot be identical and prevents the copy request from being submitted
 
 ---
 
 ### Edge Cases
 
-- What happens when the source and destination URIs are identical? (Should either prevent the copy or warn the user)
-- How does the system handle very large blobs (multi-gigabyte files) and ensure the progress updates are responsive?
-- What happens if the copy operation times out? (Should the user be notified and offered a retry option)
-- How does the system handle special characters or non-ASCII characters in blob names?
-- What happens if the destination already contains a blob with the same name? (Should the user be prompted to overwrite, rename, or cancel)
+- Source and destination URIs are identical: System MUST prevent the copy operation and display a validation error (per FR-011)
+- Destination already contains a blob with the same name: System prompts user to overwrite, cancel, or rename (per FR-009)
+- Large blobs up to 5 TB: Azure SDK handles chunking automatically; progress updates track completion percentage (per FR-012)
+- Copy operation times out: User is notified and offered a retry option (per FR-013)
+- Special characters or non-ASCII characters in blob names: System validates against Azure's prohibited characters only, allowing all others (per FR-014)
 
 ## Requirements *(mandatory)*
 
@@ -77,8 +88,12 @@ The system validates the blob URIs provided by the user before attempting the co
 - **FR-006**: System MUST display a success message when the blob copy completes successfully
 - **FR-007**: System MUST display an error message when the copy operation fails, with a clear explanation of the failure reason
 - **FR-008**: System MUST provide the ability for the user to cancel an ongoing copy operation
-- **FR-009**: System MUST [NEEDS CLARIFICATION: behavior when destination blob already exists - overwrite, skip, rename, or prompt user?]
-- **FR-010**: System MUST [NEEDS CLARIFICATION: authentication method - should the user provide credentials inline, use connection strings, or rely on Azure Entra ID?]
+- **FR-009**: System MUST detect if a blob already exists at the destination URI and prompt the user with options to: (a) overwrite the existing blob, (b) cancel the operation, or (c) rename the destination blob. The system proceeds only after the user makes a selection.
+- **FR-010**: System MUST authenticate using Azure Entra ID via DefaultAzureCredential, supporting Azure CLI authentication, managed identity, and environment-based credentials. No inline credential input or connection strings are accepted in the UI.
+- **FR-011**: System MUST validate that source and destination URIs are not identical before submitting the copy request, displaying an error message to the user if they are the same
+- **FR-012**: System MUST support copying blobs up to 5 TB in size (Azure block blob limit), using Azure SDK's automatic chunking and retry mechanisms for large transfers
+- **FR-013**: System MUST detect copy operation timeouts, display an error message to the user indicating the timeout occurred, and provide a retry option to restart the operation
+- **FR-014**: System MUST accept blob names containing Unicode and special characters as supported by Azure Blob Storage naming rules, validating only against Azure's prohibited characters (e.g., \, /, :, *, ?, ", <, >, |) and displaying appropriate validation errors when violations occur
 
 ### Key Entities *(include if feature involves data)*
 
@@ -100,8 +115,8 @@ The system validates the blob URIs provided by the user before attempting the co
 ## Assumptions
 
 1. The user has existing Azure Blob Storage accounts and blobs available
-2. The user has the necessary Azure credentials and permissions to access the source blob and write to the destination
+2. The user is authenticated via Azure CLI (`az login`) or the application runs with managed identity configured with necessary permissions to access the source blob and write to the destination
 3. The system has network connectivity to Azure Blob Storage
-4. The feature will integrate with Azure Entra ID for authentication (per Speckit constitution principle 10)
+4. DefaultAzureCredential will be used for authentication, supporting Azure CLI, managed identity, and environment variables (per constitution principle 10)
 5. Source and destination can be in the same or different storage accounts
 6. The system should use Azure SDK or Azure REST APIs for blob operations (per constitution technology stack)

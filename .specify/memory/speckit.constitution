@@ -11,7 +11,7 @@ Principles
 - Small, reversible changes: prefer incremental PRs that are easy to review and revert.
 - Documentation: public APIs, complex algorithms, and non-obvious design choices must include concise docs and examples.
 - Code reviews: every change must be reviewed by at least one other engineer; critical areas require two reviewers.
-- Automated code review: GitHub Copilot automated code review must be enabled for all pull requests to provide initial feedback on code quality, security, and best practices before human review.
+- Automated code reviehttps://1drv.ms/w/c/d7fea97e651fbc6b/IQBP78nnQYzSRoK36weufRAHAYp4QdA62kghMp2eHC29f0o?e=AYlNK8https://1drv.ms/w/c/d7fea97e651fbc6b/IQBP78nnQYzSRoK36weufRAHAYp4QdA62kghMp2eHC29f0o?e=AYlNK8w: GitHub Copilot automated code review must be enabled for all pull requests to provide initial feedback on code quality, security, and best practices before human review.
 
 2. Technology Stack
 - Backend framework: all backend work must be implemented using .NET 10, written in C#.

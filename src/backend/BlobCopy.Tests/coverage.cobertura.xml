@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<coverage line-rate="0.5731" branch-rate="0.6572" version="1.9" timestamp="1768263411" lines-covered="834" lines-valid="1455" branches-covered="163" branches-valid="248">
+<coverage line-rate="0.5731" branch-rate="0.6572" version="1.9" timestamp="1768374992" lines-covered="834" lines-valid="1455" branches-covered="163" branches-valid="248">
   <sources>
     <source>C:\Projects\QCells\speckittest\my-project\src\backend\BlobCopy.API\</source>
   </sources>

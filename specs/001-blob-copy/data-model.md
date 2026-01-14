@@ -277,6 +277,9 @@ OR
 3. Container and blob names must follow Azure naming rules:
    - Container: lowercase alphanumeric and hyphens, 3-63 characters
    - Blob: any UTF-8 characters except null, up to 1024 characters
+4. Source URI and destination URI must not be identical (case-insensitive comparison)
+   - Error code: IDENTICAL_URIS
+   - Validated on both client-side (for UX) and server-side (for security)
 4. Both sourceUri and destinationUri must pass format validation
 5. sourceUri and destinationUri must NOT be identical
 6. Blob must exist at sourceUri (checked on server-side before copy starts)

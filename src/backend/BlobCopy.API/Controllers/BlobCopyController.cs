@@ -17,6 +17,7 @@ public class BlobCopyController : ControllerBase
     private readonly IBlobValidationService _validationService;
     private readonly IBlobCopyService _copyService;
     private readonly IProgressNotificationService _progressService;
+    private readonly IBlobClientFactory _blobClientFactory;
     private readonly ILogger<BlobCopyController> _logger;
 
     /// <summary>
@@ -26,11 +27,13 @@ public class BlobCopyController : ControllerBase
         IBlobValidationService validationService,
         IBlobCopyService copyService,
         IProgressNotificationService progressService,
+        IBlobClientFactory blobClientFactory,
         ILogger<BlobCopyController> logger)
     {
         _validationService = validationService ?? throw new ArgumentNullException(nameof(validationService));
         _copyService = copyService ?? throw new ArgumentNullException(nameof(copyService));
         _progressService = progressService ?? throw new ArgumentNullException(nameof(progressService));
+        _blobClientFactory = blobClientFactory ?? throw new ArgumentNullException(nameof(blobClientFactory));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -186,6 +189,40 @@ public class BlobCopyController : ControllerBase
                 return BadRequest(validationErrors);
             }
 
+            // Determine the final destination URI (may be modified if newDestinationName is provided)
+            var finalDestinationUri = request.DestinationUri;
+            if (!string.IsNullOrWhiteSpace(request.NewDestinationName))
+            {
+                var baseUri = request.DestinationUri.Substring(0, request.DestinationUri.LastIndexOf('/') + 1);
+                finalDestinationUri = $"{baseUri}{request.NewDestinationName}";
+                _logger.LogInformation("Using renamed destination: {FinalDestination}", finalDestinationUri);
+            }
+
+            // Check if destination blob already exists (FR-009)
+            if (!request.OverwriteIfExists)
+            {
+                try
+                {
+                    var destBlobClient = _blobClientFactory.CreateBlobClient(finalDestinationUri);
+                    var existsResponse = await destBlobClient.ExistsAsync(cancellationToken);
+
+                    if (existsResponse.Value)
+                    {
+                        _logger.LogInformation(
+                            "Destination blob already exists: {DestinationUri}. Returning 409 Conflict.",
+                            finalDestinationUri
+                        );
+
+                        return Conflict(ConflictResponse.ForExistingDestination(finalDestinationUri));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Could not check destination existence, proceeding with copy");
+                    // Continue with copy - let it fail naturally if there's a permission issue
+                }
+            }
+
             // Generate operation ID
             var operationId = Guid.NewGuid().ToString();
 
@@ -193,7 +230,7 @@ public class BlobCopyController : ControllerBase
             var operation = await _copyService.StartCopyAsync(
                 operationId,
                 request.SourceUri,
-                request.DestinationUri,
+                finalDestinationUri,
                 cancellationToken
             );
 

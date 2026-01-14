@@ -1,5 +1,18 @@
 import axios, { AxiosInstance } from 'axios';
-import { CopyRequest, BlobCopyOperation, ValidationError } from '../types';
+import { CopyRequest, BlobCopyOperation, ValidationError, ConflictInfo } from '../types';
+
+/**
+ * Error thrown when a 409 Conflict occurs (destination blob exists).
+ */
+export class ConflictError extends Error {
+  public conflictInfo: ConflictInfo;
+
+  constructor(conflictInfo: ConflictInfo) {
+    super(`Destination blob already exists: ${conflictInfo.destinationUri}`);
+    this.name = 'ConflictError';
+    this.conflictInfo = conflictInfo;
+  }
+}
 
 /**
  * API client for blob copy backend service.
@@ -48,6 +61,7 @@ export class ApiClient {
    *
    * @param request - Copy request with source and destination URIs
    * @returns Created BlobCopyOperation with operation ID
+   * @throws ConflictError if destination blob already exists (409)
    * @throws Error if copy operation cannot be started
    */
   async startCopy(request: CopyRequest): Promise<BlobCopyOperation> {
@@ -58,11 +72,25 @@ export class ApiClient {
       );
       return response.data;
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response?.status === 400) {
-        const errors = error.response.data as ValidationError[];
-        throw new Error(
-          `Cannot start copy: ${errors[0]?.message || 'Validation failed'}`
-        );
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 409) {
+          // Destination blob already exists
+          const conflictData = error.response.data as {
+            destinationUri: string;
+            code: string;
+            message: string;
+          };
+          throw new ConflictError({
+            destinationExists: true,
+            destinationUri: conflictData.destinationUri || request.destinationUri,
+          });
+        }
+        if (error.response?.status === 400) {
+          const errors = error.response.data as ValidationError[];
+          throw new Error(
+            `Cannot start copy: ${errors[0]?.message || 'Validation failed'}`
+          );
+        }
       }
       throw this.handleError(error, 'Failed to start copy operation');
     }

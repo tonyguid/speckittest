@@ -10,7 +10,7 @@
             Handles validation, copy initiation, status tracking, and cancellation.
             </summary>
         </member>
-        <member name="M:BlobCopy.API.Controllers.BlobCopyController.#ctor(BlobCopy.API.Services.IBlobValidationService,BlobCopy.API.Services.IBlobCopyService,BlobCopy.API.Services.IProgressNotificationService,Microsoft.Extensions.Logging.ILogger{BlobCopy.API.Controllers.BlobCopyController})">
+        <member name="M:BlobCopy.API.Controllers.BlobCopyController.#ctor(BlobCopy.API.Services.IBlobValidationService,BlobCopy.API.Services.IBlobCopyService,BlobCopy.API.Services.IProgressNotificationService,BlobCopy.API.Services.IBlobClientFactory,Microsoft.Extensions.Logging.ILogger{BlobCopy.API.Controllers.BlobCopyController})">
             <summary>
             Initializes a new instance of BlobCopyController.
             </summary>
@@ -297,6 +297,17 @@
             <param name="serverTime">Server timestamp (ISO 8601)</param>
             <param name="connectionId">Unique connection ID assigned by SignalR</param>
         </member>
+        <member name="T:BlobCopy.API.Middleware.ErrorHandlingMiddleware">
+            <summary>
+            Global error handling middleware that catches unhandled exceptions
+            and returns standardized error responses.
+            </summary>
+        </member>
+        <member name="T:BlobCopy.API.Middleware.ErrorHandlingMiddlewareExtensions">
+            <summary>
+            Extension methods to register the error handling middleware.
+            </summary>
+        </member>
         <member name="T:BlobCopy.API.Middleware.RequestLoggingMiddleware">
             <summary>
             Middleware for logging HTTP requests and responses with correlation IDs.
@@ -464,6 +475,41 @@
             Used for 404 responses.
             </summary>
         </member>
+        <member name="T:BlobCopy.API.Models.ConflictResponse">
+            <summary>
+            Response returned when destination blob already exists (409 Conflict).
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ConflictResponse.Code">
+            <summary>
+            Error code for programmatic handling.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ConflictResponse.Message">
+            <summary>
+            User-friendly error message.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ConflictResponse.DestinationUri">
+            <summary>
+            The destination URI that already exists.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ConflictResponse.CanOverwrite">
+            <summary>
+            Whether the destination can be overwritten.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ConflictResponse.SuggestedActions">
+            <summary>
+            Suggested alternative actions.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Models.ConflictResponse.ForExistingDestination(System.String)">
+            <summary>
+            Creates a conflict response for an existing destination.
+            </summary>
+        </member>
         <member name="T:BlobCopy.API.Models.CopyRequest">
             <summary>
             Request payload for initiating a blob copy operation.
@@ -482,6 +528,64 @@
             Format: https://[account].blob.core.windows.net/[container]/[blob]
             Required, must be a valid Azure Blob Storage URI.
             Must be different from SourceUri.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.CopyRequest.OverwriteIfExists">
+            <summary>
+            If true, overwrite destination blob if it already exists.
+            If false and destination exists, returns 409 Conflict.
+            Default: false
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.CopyRequest.NewDestinationName">
+            <summary>
+            Optional new name for the destination blob when resolving a conflict.
+            If provided, the copy will use this name instead of the original.
+            </summary>
+        </member>
+        <member name="T:BlobCopy.API.Models.CopyResult">
+            <summary>
+            Result of a completed copy operation.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.CopyResult.Success">
+            <summary>
+            Whether the copy operation succeeded.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.CopyResult.DestinationUri">
+            <summary>
+            The destination URI where the blob was copied.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.CopyResult.ErrorMessage">
+            <summary>
+            Error message if the copy failed.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.CopyResult.ErrorCode">
+            <summary>
+            Error code for programmatic handling.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.CopyResult.BytesTransferred">
+            <summary>
+            Total bytes transferred.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.CopyResult.DurationMs">
+            <summary>
+            Duration of the copy operation in milliseconds.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Models.CopyResult.Succeeded(System.String,System.Int64,System.Int64)">
+            <summary>
+            Creates a successful copy result.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Models.CopyResult.Failed(System.String,System.String)">
+            <summary>
+            Creates a failed copy result.
             </summary>
         </member>
         <member name="T:BlobCopy.API.Models.ErrorResponse">
@@ -592,6 +696,36 @@
             <summary>
             Error code for programmatic handling.
             e.g., "INVALID_URI_FORMAT", "URI_NOT_FOUND", "INSUFFICIENT_PERMISSIONS"
+            </summary>
+        </member>
+        <member name="T:BlobCopy.API.Models.ValidationResult">
+            <summary>
+            Result of URI validation containing validation status and any errors.
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ValidationResult.IsValid">
+            <summary>
+            Whether the validation passed (no errors).
+            </summary>
+        </member>
+        <member name="P:BlobCopy.API.Models.ValidationResult.Errors">
+            <summary>
+            List of validation errors, empty if validation passed.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Models.ValidationResult.Success">
+            <summary>
+            Creates a successful validation result.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Models.ValidationResult.Failure(BlobCopy.API.Models.ValidationError[])">
+            <summary>
+            Creates a failed validation result with the specified errors.
+            </summary>
+        </member>
+        <member name="M:BlobCopy.API.Models.ValidationResult.Failure(System.String,System.String,System.String)">
+            <summary>
+            Creates a failed validation result with a single error.
             </summary>
         </member>
         <member name="T:BlobCopy.API.Services.BlobClientFactory">
