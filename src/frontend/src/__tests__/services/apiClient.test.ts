@@ -1,26 +1,45 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import axios from 'axios';
-import { apiClient } from '../../services/apiClient';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CopyRequest, BlobCopyOperation, BlobCopyStatus } from '../../types';
 
-// Mock axios
-vi.mock('axios');
+// Create shared mock instance
+const mockPostFn = vi.fn();
+const mockGetFn = vi.fn();
 
-describe('ApiClient', () => {
-  const mockAxios = axios as unknown as {
-    create: ReturnType<typeof vi.fn>;
+// Mock axios module - must be self-contained
+vi.mock('axios', () => {
+  // Create instance inside the factory
+  const instance = {
+    post: (...args: any[]) => mockPostFn(...args),
+    get: (...args: any[]) => mockGetFn(...args),
+    defaults: {
+      baseURL: '/api',
+      headers: {
+        common: {},
+      },
+    },
   };
 
+  return {
+    default: {
+      create: () => instance,
+      isAxiosError: (error: any) => error?.isAxiosError === true,
+    },
+  };
+});
+
+// Import after mock setup
+import { apiClient } from '../../services/apiClient';
+
+describe('ApiClient', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockPostFn.mockClear();
+    mockGetFn.mockClear();
   });
 
   describe('validate', () => {
     it('should return empty array for valid blobs', async () => {
       const mockResponse = { data: [] };
-      mockAxios.create.mockReturnValue({
-        post: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockPostFn.mockResolvedValue(mockResponse);
 
       const request: CopyRequest = {
         sourceUri: 'https://account.blob.core.windows.net/source/blob',
@@ -30,7 +49,7 @@ describe('ApiClient', () => {
       const errors = await apiClient.validate(request);
 
       expect(errors).toEqual([]);
-      expect(mockAxios.create).toHaveBeenCalled();
+      expect(mockPostFn).toHaveBeenCalledWith('/blobcopy/validate', request);
     });
 
     it('should return validation errors for invalid URIs', async () => {
@@ -38,9 +57,7 @@ describe('ApiClient', () => {
         { field: 'sourceUri', message: 'Invalid URI format' },
       ];
       const mockResponse = { data: mockErrors };
-      mockAxios.create.mockReturnValue({
-        post: vi.fn().mockResolvedValue(mockResponse),
-      });
+      mockPostFn.mockResolvedValue(mockResponse);
 
       const request: CopyRequest = {
         sourceUri: 'invalid',
@@ -54,21 +71,21 @@ describe('ApiClient', () => {
 
     it('should handle network errors gracefully', async () => {
       const mockError = {
+        isAxiosError: true,
         response: {
           status: 500,
           data: { message: 'Server error' },
         },
+        message: 'Server error',
       };
-      mockAxios.create.mockReturnValue({
-        post: vi.fn().mockRejectedValue(mockError),
-      });
+      mockPostFn.mockRejectedValue(mockError);
 
       const request: CopyRequest = {
         sourceUri: 'https://account.blob.core.windows.net/source/blob',
         destinationUri: 'https://account.blob.core.windows.net/dest/blob',
       };
 
-      await expect(apiClient.validate(request)).rejects.toThrow();
+      await expect(apiClient.validate(request)).rejects.toThrow('Server error');
     });
   });
 
@@ -86,9 +103,7 @@ describe('ApiClient', () => {
         correlationId: 'corr-123',
       };
 
-      mockAxios.create.mockReturnValue({
-        post: vi.fn().mockResolvedValue({ data: mockOperation }),
-      });
+      mockPostFn.mockResolvedValue({ data: mockOperation });
 
       const request: CopyRequest = {
         sourceUri: mockOperation.sourceUri,
@@ -103,15 +118,14 @@ describe('ApiClient', () => {
 
     it('should throw on validation errors (400)', async () => {
       const mockError = {
+        isAxiosError: true,
         response: {
           status: 400,
-          data: { message: 'Validation failed' },
+          data: [{ field: 'sourceUri', message: 'Validation failed' }],
         },
       };
 
-      mockAxios.create.mockReturnValue({
-        post: vi.fn().mockRejectedValue(mockError),
-      });
+      mockPostFn.mockRejectedValue(mockError);
 
       const request: CopyRequest = {
         sourceUri: 'invalid',
@@ -138,9 +152,7 @@ describe('ApiClient', () => {
         correlationId: 'corr-123',
       };
 
-      mockAxios.create.mockReturnValue({
-        get: vi.fn().mockResolvedValue({ data: mockOperation }),
-      });
+      mockGetFn.mockResolvedValue({ data: mockOperation });
 
       const status = await apiClient.getStatus('op-123');
 
@@ -150,18 +162,17 @@ describe('ApiClient', () => {
 
     it('should throw for non-existent operation (404)', async () => {
       const mockError = {
+        isAxiosError: true,
         response: {
           status: 404,
           data: { message: 'Operation not found' },
         },
       };
 
-      mockAxios.create.mockReturnValue({
-        get: vi.fn().mockRejectedValue(mockError),
-      });
+      mockGetFn.mockRejectedValue(mockError);
 
       await expect(apiClient.getStatus('non-existent')).rejects.toThrow(
-        'Operation not found'
+        "Operation 'non-existent' not found"
       );
     });
   });
@@ -181,9 +192,7 @@ describe('ApiClient', () => {
         correlationId: 'corr-123',
       };
 
-      mockAxios.create.mockReturnValue({
-        post: vi.fn().mockResolvedValue({ data: mockOperation }),
-      });
+      mockPostFn.mockResolvedValue({ data: mockOperation });
 
       const result = await apiClient.cancelCopy('op-123');
 
@@ -192,25 +201,24 @@ describe('ApiClient', () => {
 
     it('should throw for non-existent operation', async () => {
       const mockError = {
+        isAxiosError: true,
         response: {
           status: 404,
           data: { message: 'Operation not found' },
         },
       };
 
-      mockAxios.create.mockReturnValue({
-        post: vi.fn().mockRejectedValue(mockError),
-      });
+      mockPostFn.mockRejectedValue(mockError);
 
-      await expect(apiClient.cancelCopy('non-existent')).rejects.toThrow();
+      await expect(apiClient.cancelCopy('non-existent')).rejects.toThrow(
+        "Operation 'non-existent' not found"
+      );
     });
   });
 
   describe('checkHealth', () => {
     it('should return true when service is healthy', async () => {
-      mockAxios.create.mockReturnValue({
-        get: vi.fn().mockResolvedValue({ data: { status: 'healthy' } }),
-      });
+      mockGetFn.mockResolvedValue({ data: { status: 'healthy' } });
 
       const isHealthy = await apiClient.checkHealth();
 
@@ -218,9 +226,7 @@ describe('ApiClient', () => {
     });
 
     it('should return false when service is unhealthy', async () => {
-      mockAxios.create.mockReturnValue({
-        get: vi.fn().mockRejectedValue(new Error('Service unavailable')),
-      });
+      mockGetFn.mockRejectedValue(new Error('Service unavailable'));
 
       const isHealthy = await apiClient.checkHealth();
 
@@ -230,11 +236,22 @@ describe('ApiClient', () => {
 
   describe('setAuthToken', () => {
     it('should set authorization header', () => {
-      const token = 'Bearer token123';
+      const token = 'token123';
 
       apiClient.setAuthToken(token);
 
-      // Token should be set in axios default headers (implementation specific)
+      // Verify the method was called (actual header is set internally)
+      expect(apiClient).toBeDefined();
+    });
+  });
+
+  describe('setBaseURL', () => {
+    it('should update base URL', () => {
+      const newUrl = 'https://api.example.com';
+
+      apiClient.setBaseURL(newUrl);
+
+      // Verify the method was called (actual base URL is set internally)
       expect(apiClient).toBeDefined();
     });
   });

@@ -10,6 +10,11 @@ describe('SignalRClient', () => {
     vi.clearAllMocks();
   });
 
+  afterEach(async () => {
+    // Reset singleton state between tests
+    await signalRClient.disconnect();
+  });
+
   describe('connect', () => {
     it('should establish connection with hub', async () => {
       const mockConnection = {
@@ -23,7 +28,9 @@ describe('SignalRClient', () => {
       vi.mocked(HubConnectionBuilder).mockReturnValue({
         withUrl: vi.fn().mockReturnValue({
           withAutomaticReconnect: vi.fn().mockReturnValue({
-            build: vi.fn().mockReturnValue(mockConnection),
+            configureLogging: vi.fn().mockReturnValue({
+              build: vi.fn().mockReturnValue(mockConnection),
+            }),
           }),
         }),
       } as any);
@@ -40,12 +47,16 @@ describe('SignalRClient', () => {
         onreconnecting: vi.fn(),
         onreconnected: vi.fn(),
         onclose: vi.fn(),
+        invoke: vi.fn().mockResolvedValue(undefined),
+        state: 'Connected',
       };
 
       vi.mocked(HubConnectionBuilder).mockReturnValue({
         withUrl: vi.fn().mockReturnValue({
           withAutomaticReconnect: vi.fn().mockReturnValue({
-            build: vi.fn().mockReturnValue(mockConnection),
+            configureLogging: vi.fn().mockReturnValue({
+              build: vi.fn().mockReturnValue(mockConnection),
+            }),
           }),
         }),
       } as any);
@@ -67,9 +78,14 @@ describe('SignalRClient', () => {
       vi.mocked(HubConnectionBuilder).mockReturnValue({
         withUrl: vi.fn().mockReturnValue({
           withAutomaticReconnect: vi.fn().mockReturnValue({
-            build: vi.fn().mockReturnValue({
-              start: vi.fn().mockRejectedValue(new Error('Connection failed')),
-              on: vi.fn(),
+            configureLogging: vi.fn().mockReturnValue({
+              build: vi.fn().mockReturnValue({
+                start: vi.fn().mockRejectedValue(new Error('Connection failed')),
+                on: vi.fn(),
+                onreconnecting: vi.fn(),
+                onreconnected: vi.fn(),
+                onclose: vi.fn(),
+              }),
             }),
           }),
         }),
@@ -87,12 +103,18 @@ describe('SignalRClient', () => {
         start: vi.fn().mockResolvedValue(undefined),
         stop: vi.fn().mockResolvedValue(undefined),
         on: vi.fn(),
+        onreconnecting: vi.fn(),
+        onreconnected: vi.fn(),
+        onclose: vi.fn(),
+        state: 'Connected',
       };
 
       vi.mocked(HubConnectionBuilder).mockReturnValue({
         withUrl: vi.fn().mockReturnValue({
           withAutomaticReconnect: vi.fn().mockReturnValue({
-            build: vi.fn().mockReturnValue(mockConnection),
+            configureLogging: vi.fn().mockReturnValue({
+              build: vi.fn().mockReturnValue(mockConnection),
+            }),
           }),
         }),
       } as any);
@@ -110,12 +132,18 @@ describe('SignalRClient', () => {
         start: vi.fn().mockResolvedValue(undefined),
         invoke: vi.fn().mockResolvedValue(undefined),
         on: vi.fn(),
+        onreconnecting: vi.fn(),
+        onreconnected: vi.fn(),
+        onclose: vi.fn(),
+        state: 'Connected',
       };
 
       vi.mocked(HubConnectionBuilder).mockReturnValue({
         withUrl: vi.fn().mockReturnValue({
           withAutomaticReconnect: vi.fn().mockReturnValue({
-            build: vi.fn().mockReturnValue(mockConnection),
+            configureLogging: vi.fn().mockReturnValue({
+              build: vi.fn().mockReturnValue(mockConnection),
+            }),
           }),
         }),
       } as any);
@@ -140,12 +168,18 @@ describe('SignalRClient', () => {
         start: vi.fn().mockResolvedValue(undefined),
         invoke: vi.fn().mockResolvedValue(undefined),
         on: vi.fn(),
+        onreconnecting: vi.fn(),
+        onreconnected: vi.fn(),
+        onclose: vi.fn(),
+        state: 'Connected',
       };
 
       vi.mocked(HubConnectionBuilder).mockReturnValue({
         withUrl: vi.fn().mockReturnValue({
           withAutomaticReconnect: vi.fn().mockReturnValue({
-            build: vi.fn().mockReturnValue(mockConnection),
+            configureLogging: vi.fn().mockReturnValue({
+              build: vi.fn().mockReturnValue(mockConnection),
+            }),
           }),
         }),
       } as any);
@@ -166,13 +200,18 @@ describe('SignalRClient', () => {
       const mockConnection = {
         start: vi.fn().mockResolvedValue(undefined),
         on: vi.fn(),
-        state: 1, // Connected state
+        onreconnecting: vi.fn(),
+        onreconnected: vi.fn(),
+        onclose: vi.fn(),
+        state: 'Connected',
       };
 
       vi.mocked(HubConnectionBuilder).mockReturnValue({
         withUrl: vi.fn().mockReturnValue({
           withAutomaticReconnect: vi.fn().mockReturnValue({
-            build: vi.fn().mockReturnValue(mockConnection),
+            configureLogging: vi.fn().mockReturnValue({
+              build: vi.fn().mockReturnValue(mockConnection),
+            }),
           }),
         }),
       } as any);
@@ -199,12 +238,18 @@ describe('SignalRClient', () => {
       const mockConnection = {
         start: vi.fn().mockResolvedValue(undefined),
         on: vi.fn(),
+        onreconnecting: vi.fn(),
+        onreconnected: vi.fn(),
+        onclose: vi.fn(),
+        state: 'Connected',
       };
 
       vi.mocked(HubConnectionBuilder).mockReturnValue({
         withUrl: vi.fn().mockReturnValue({
           withAutomaticReconnect: vi.fn().mockReturnValue({
-            build: vi.fn().mockReturnValue(mockConnection),
+            configureLogging: vi.fn().mockReturnValue({
+              build: vi.fn().mockReturnValue(mockConnection),
+            }),
           }),
         }),
       } as any);
