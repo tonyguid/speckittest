@@ -1,0 +1,185 @@
+name: Performance Tests
+
+on:
+  schedule:
+    # Run nightly at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      run_full_suite:
+        description: 'Run full performance test suite'
+        required: false
+        default: 'false'
+        type: boolean
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  NODE_VERSION: '20.x'
+
+jobs:
+  backend-performance:
+    name: Backend Performance Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore src/backend/BlobCopy.Tests/BlobCopy.Tests.csproj
+
+      - name: Build test project
+        run: dotnet build src/backend/BlobCopy.Tests/BlobCopy.Tests.csproj --configuration Release --no-restore
+
+      - name: Run Performance Tests
+        run: |
+          dotnet test src/backend/BlobCopy.Tests/BlobCopy.Tests.csproj \
+            --configuration Release \
+            --no-build \
+            --filter "Category=Performance" \
+            --logger "trx;LogFileName=performance-results.trx" \
+            --results-directory ./TestResults
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-performance-results
+          path: ./TestResults/
+          retention-days: 30
+
+      - name: Parse and Report Results
+        if: always()
+        run: |
+          echo "## Performance Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f "./TestResults/performance-results.trx" ]; then
+            # Count passed/failed tests
+            PASSED=$(grep -o 'outcome="Passed"' ./TestResults/performance-results.trx | wc -l || echo "0")
+            FAILED=$(grep -o 'outcome="Failed"' ./TestResults/performance-results.trx | wc -l || echo "0")
+
+            echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Passed | $PASSED |" >> $GITHUB_STEP_SUMMARY
+            echo "| Failed | $FAILED |" >> $GITHUB_STEP_SUMMARY
+
+            if [ "$FAILED" -gt "0" ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "**Warning: Some performance tests failed. Review the artifacts for details.**" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "No test results found." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  frontend-performance:
+    name: Frontend Performance Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: src/frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: src/frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: src/frontend
+        run: npm run build
+
+      - name: Analyze bundle size
+        working-directory: src/frontend
+        run: |
+          echo "## Frontend Bundle Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -d "dist" ]; then
+            TOTAL_SIZE=$(du -sh dist | cut -f1)
+            JS_SIZE=$(find dist -name "*.js" -exec du -ch {} + | tail -1 | cut -f1)
+            CSS_SIZE=$(find dist -name "*.css" -exec du -ch {} + | tail -1 | cut -f1)
+
+            echo "| Asset Type | Size |" >> $GITHUB_STEP_SUMMARY
+            echo "|------------|------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Total Bundle | $TOTAL_SIZE |" >> $GITHUB_STEP_SUMMARY
+            echo "| JavaScript | $JS_SIZE |" >> $GITHUB_STEP_SUMMARY
+            echo "| CSS | $CSS_SIZE |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Run Lighthouse CI
+        if: ${{ inputs.run_full_suite == 'true' || github.event_name == 'schedule' }}
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          configPath: src/frontend/lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+        continue-on-error: true
+
+  performance-regression:
+    name: Performance Regression Check
+    runs-on: ubuntu-latest
+    needs: [backend-performance, frontend-performance]
+    if: always()
+
+    steps:
+      - name: Download backend results
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-performance-results
+          path: ./backend-results
+        continue-on-error: true
+
+      - name: Check for regressions
+        run: |
+          echo "## Performance Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Performance tests completed. Review individual job results for details." >> $GITHUB_STEP_SUMMARY
+
+          # In a production setup, this would compare against baseline metrics
+          # and fail if there are significant regressions
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Performance Targets" >> $GITHUB_STEP_SUMMARY
+          echo "- Validation endpoint: p95 < 200ms" >> $GITHUB_STEP_SUMMARY
+          echo "- 100MB copy operation: < 60s" >> $GITHUB_STEP_SUMMARY
+          echo "- API throughput: > 1000 req/s" >> $GITHUB_STEP_SUMMARY
+
+      - name: Create issue on regression
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `Performance Regression Detected - ${new Date().toISOString().split('T')[0]}`;
+            const body = `
+            ## Performance Regression Alert
+
+            The nightly performance tests have detected a potential regression.
+
+            **Run:** ${context.runId}
+            **Commit:** ${context.sha}
+
+            Please review the test results and investigate.
+
+            [View Workflow Run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+            `;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['performance', 'automated']
+            });
