@@ -22,6 +22,8 @@
     <!-- API Versioning -->
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="5.1.0" />
+    <PackageReference Include="Microsoft.Graph" Version="5.35.0" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="2.15.0" />
     
     <!-- Swagger/OpenAPI -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />

@@ -19,6 +19,19 @@
   - Deployed independently
   - Demonstrated to users independently
 -->
+[ALWAYS add User Story 0 exactly as written below]
+
+### User Story 0 – Foundational Setup for System Operations (Priority: P1)
+
+The system requires foundational infrastructure, configuration, and environment preparation to support all upcoming functionality. This includes establishing the project structure, initializing required services, configuring authentication and access, and ensuring that the application can reliably run and interact with its dependencies before any user‑facing features are implemented.
+
+**Why this priority**: Without a stable and validated foundation, no user‑facing capabilities can function. This work is essential, non‑negotiable, and must be completed before any feature can deliver value. It ensures the system is secure, operational, and ready for core functionality.
+**Independent Test**: Can be fully tested by verifying that the environment builds successfully, required services are reachable, authentication works end‑to‑end, and a basic operational check confirms the system is ready for higher‑level features.
+**Acceptance Scenarios**:
+1. **Given** the development environment is initialized, **When** the system builds and starts, **Then** all foundational services, libraries, and configurations load without errors.
+2. **Given**the system is running, **When** it attempts to authenticate using the configured identity mechanism (e.g., service account, managed identity, API key, or equivalent), **Then** authentication succeeds and the system can obtain valid access to required resources.
+3. **Given** the foundational setup is complete, **When** the system performs a basic operational check (e.g., connectivity, health probe, or minimal API call), **Then** the system confirms that required dependencies are reachable and permissions are correctly configured.
+4. **Given** the foundational environment is configured, **When** a minimal system operation is executed (e.g., listing resources, validating configuration, or performing a simple read/write), **Then** the system successfully completes the operation, demonstrating readiness for user‑facing features.
 
 ### User Story 1 - [Brief Title] (Priority: P1)
 

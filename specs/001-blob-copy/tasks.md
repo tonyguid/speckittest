@@ -21,11 +21,11 @@
 
 **Purpose**: Project initialization and basic structure
 
-- [X] T001 Create project structure per plan.md (backend: src/backend/BlobCopy.API/, frontend: src/frontend/)
-- [X] T002 [P] Initialize .NET 10 backend project with required NuGet packages (Azure.Storage.Blobs, Azure.Identity, Microsoft.AspNetCore.SignalR) in src/backend/BlobCopy.API/BlobCopy.API.csproj
-- [X] T003 [P] Initialize React 18+ frontend project with TypeScript, Axios, @microsoft/signalr in src/frontend/package.json
-- [X] T004 [P] Configure ESLint, Prettier for frontend in src/frontend/
-- [X] T005 [P] Configure EditorConfig and code style for backend in src/backend/
+- [X] T001 [US0] Create project structure per plan.md (backend: src/backend/BlobCopy.API/, frontend: src/frontend/)
+- [X] T002 [P] [US0] Initialize .NET 10 backend project with required NuGet packages (Azure.Storage.Blobs, Azure.Identity, Microsoft.AspNetCore.SignalR) in src/backend/BlobCopy.API/BlobCopy.API.csproj
+- [X] T003 [P] [US0] Initialize React 18+ frontend project with TypeScript, Axios, @microsoft/signalr in src/frontend/package.json
+- [X] T004 [P] [US0] Configure ESLint, Prettier for frontend in src/frontend/
+- [X] T005 [P] [US0] Configure EditorConfig and code style for backend in src/backend/
 
 ---
 
@@ -37,33 +37,33 @@
 
 ### Data Models
 
-- [X] T006 [P] Create BlobCopyOperation model in src/backend/BlobCopy.API/Models/BlobCopyOperation.cs
-- [X] T007 [P] Create BlobCopyStatus enum in src/backend/BlobCopy.API/Models/BlobCopyStatus.cs
-- [X] T008 [P] Create ProgressUpdate model in src/backend/BlobCopy.API/Models/ProgressUpdate.cs
-- [X] T009 [P] Create ValidationError model in src/backend/BlobCopy.API/Models/ValidationError.cs
-- [X] T010 [P] Create CopyRequest DTO in src/backend/BlobCopy.API/Models/CopyRequest.cs
-- [X] T011 [P] Create ValidationResult model in src/backend/BlobCopy.API/Models/ValidationResult.cs
-- [X] T011b [P] Create CopyResult model in src/backend/BlobCopy.API/Models/CopyResult.cs
-- [X] T012 [P] Create TypeScript interfaces (BlobCopyOperation, ProgressUpdate, ValidationError, CopyResult) in src/frontend/src/types.ts
+- [X] T006 [P] [US0] Create BlobCopyOperation model in src/backend/BlobCopy.API/Models/BlobCopyOperation.cs
+- [X] T007 [P] [US0] Create BlobCopyStatus enum in src/backend/BlobCopy.API/Models/BlobCopyStatus.cs
+- [X] T008 [P] [US0] Create ProgressUpdate model in src/backend/BlobCopy.API/Models/ProgressUpdate.cs
+- [X] T009 [P] [US0] Create ValidationError model in src/backend/BlobCopy.API/Models/ValidationError.cs
+- [X] T010 [P] [US0] Create CopyRequest DTO in src/backend/BlobCopy.API/Models/CopyRequest.cs
+- [X] T011 [P] [US0] Create ValidationResult model in src/backend/BlobCopy.API/Models/ValidationResult.cs
+- [X] T011b [P] [US0] Create CopyResult model in src/backend/BlobCopy.API/Models/CopyResult.cs
+- [X] T012 [P] [US0] Create TypeScript interfaces (BlobCopyOperation, ProgressUpdate, ValidationError, CopyResult) in src/frontend/src/types.ts
 
 ### SignalR Infrastructure
 
-- [X] T013 Create IBlobCopyClient interface in src/backend/BlobCopy.API/Hubs/IBlobCopyClient.cs
-- [X] T014 Implement BlobCopyHub SignalR hub in src/backend/BlobCopy.API/Hubs/BlobCopyHub.cs (depends on T013)
+- [X] T013 [US0] Create IBlobCopyClient interface in src/backend/BlobCopy.API/Hubs/IBlobCopyClient.cs
+- [X] T014 [US0] Implement BlobCopyHub SignalR hub in src/backend/BlobCopy.API/Hubs/BlobCopyHub.cs (depends on T013)
 
 ### Dependency Injection & Configuration
 
-- [X] T015 Configure DI container, CORS, SignalR mapping in src/backend/BlobCopy.API/Program.cs (depends on T006-T014)
-- [X] T016 [P] Create appsettings.json with Azure Storage config in src/backend/BlobCopy.API/appsettings.json
-- [X] T017 [P] Create appsettings.Development.json for local dev in src/backend/BlobCopy.API/appsettings.Development.json
+- [X] T015 [US0] Configure DI container, CORS, SignalR mapping in src/backend/BlobCopy.API/Program.cs (depends on T006-T014)
+- [X] T016 [P] [US0] Create appsettings.json with Azure Storage config in src/backend/BlobCopy.API/appsettings.json
+- [X] T017 [P] [US0] Create appsettings.Development.json for local dev in src/backend/BlobCopy.API/appsettings.Development.json
 
 ### Error Handling Middleware
 
-- [X] T018 Implement ErrorHandlingMiddleware in src/backend/BlobCopy.API/Middleware/ErrorHandlingMiddleware.cs
+- [X] T018 [US0] Implement ErrorHandlingMiddleware in src/backend/BlobCopy.API/Middleware/ErrorHandlingMiddleware.cs
 
 ### Health Check
 
-- [X] T019 Implement HealthController with GET /api/v1/health in src/backend/BlobCopy.API/Controllers/BlobCopyController.cs (integrated)
+- [X] T019 [US0] Implement HealthController with GET /api/v1/health in src/backend/BlobCopy.API/Controllers/BlobCopyController.cs (integrated)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -221,35 +221,35 @@
 
 ### Integration Tests
 
-- [X] T068 [P] Full integration tests for BlobCopyController (all endpoints) in src/backend/BlobCopy.Tests/Integration/Controllers/
-- [X] T069 [P] API contract validation tests in src/backend/BlobCopy.Tests/Unit/ApiContractTests.cs
+- [X] T068 [P] [US0] Full integration tests for BlobCopyController (all endpoints) in src/backend/BlobCopy.Tests/Integration/Controllers/
+- [X] T069 [P] [US0] API contract validation tests in src/backend/BlobCopy.Tests/Unit/ApiContractTests.cs
 
 ### Accessibility & Quality
 
-- [X] T070 E2E test for WCAG AA accessibility in src/frontend/e2e/blob-copy.spec.ts (integrated)
-- [X] T071 E2E test for health check endpoint in src/frontend/e2e/blob-copy.spec.ts (integrated)
+- [X] T070 [US0] E2E test for WCAG AA accessibility in src/frontend/e2e/blob-copy.spec.ts (integrated)
+- [X] T071 [US0] E2E test for health check endpoint in src/frontend/e2e/blob-copy.spec.ts (integrated)
 
 ### Documentation & CI/CD
 
-- [X] T072 [P] Create/update OpenAPI spec in specs/001-blob-copy/contracts/api.openapi.yaml
-- [X] T073 [P] Create GitHub Actions CI/CD workflow in .github/workflows/ci.yml
-- [X] T074 Update quickstart.md with final setup instructions in specs/001-blob-copy/quickstart.md
+- [X] T072 [P] [US0] Create/update OpenAPI spec in specs/001-blob-copy/contracts/api.openapi.yaml
+- [X] T073 [P] [US0] Create GitHub Actions CI/CD workflow in .github/workflows/ci.yml
+- [X] T074 [US0] Update quickstart.md with final setup instructions in specs/001-blob-copy/quickstart.md
 
 ### Observability
 
-- [X] T075 [P] Integrate Application Insights in backend in src/backend/BlobCopy.API/Services/TelemetryService.cs
-- [X] T076 [P] Integrate Application Insights in frontend in src/frontend/src/services/applicationInsightsService.ts
+- [X] T075 [P] [US0] Integrate Application Insights in backend in src/backend/BlobCopy.API/Services/TelemetryService.cs
+- [X] T076 [P] [US0] Integrate Application Insights in frontend in src/frontend/src/services/applicationInsightsService.ts
 
 ### Performance Tests (SC-001, SC-004, Constitution Principle 5)
 
-- [X] T079 [P] Add performance benchmark for /validate endpoint (<200ms p95) in src/backend/BlobCopy.Tests/Performance/ValidationPerformanceTests.cs
-- [X] T080 [P] Add performance benchmark for copy operation (<1 min for 100MB) in src/backend/BlobCopy.Tests/Performance/CopyPerformanceTests.cs
-- [X] T081 [P] Configure performance test execution in CI (nightly job) in .github/workflows/performance-tests.yml
+- [X] T079 [P] [US0] Add performance benchmark for /validate endpoint (<200ms p95) in src/backend/BlobCopy.Tests/Performance/ValidationPerformanceTests.cs
+- [X] T080 [P] [US0] Add performance benchmark for copy operation (<1 min for 100MB) in src/backend/BlobCopy.Tests/Performance/CopyPerformanceTests.cs
+- [X] T081 [P] [US0] Configure performance test execution in CI (nightly job) in .github/workflows/performance-tests.yml
 
 ### Infrastructure (Optional for MVP)
 
-- [X] T082 [P] Create Terraform infrastructure files in infra/terraform/main.tf
-- [X] T083 [P] Create deployment documentation in docs/DEPLOYMENT.md
+- [X] T082 [P] [US0] Create Terraform infrastructure files in infra/terraform/main.tf
+- [X] T083 [P] [US0] Create deployment documentation in docs/DEPLOYMENT.md
 
 ---
 
