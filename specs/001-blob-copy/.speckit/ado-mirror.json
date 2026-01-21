@@ -1,0 +1,1549 @@
+{
+  "lastSync": "2026-01-21T02:43:51.609896Z",
+  "featureId": "001-blob-copy",
+  "organization": "qcellsces",
+  "project": "test-project-tony",
+  "workItems": {
+    "2734": {
+      "id": 2734,
+      "type": "Feature",
+      "title": "Blob copy",
+      "state": "New",
+      "description": null,
+      "parent": 2894,
+      "children": [
+        2895,
+        2896,
+        2897,
+        3010
+      ],
+      "tags": [],
+      "syncedAt": "2026-01-19T22:16:33.007Z"
+    },
+    "2895": {
+      "id": 2895,
+      "type": "User Story",
+      "title": "Copy Blob with Progress Tracking",
+      "state": "New",
+      "description": "A user needs to copy a blob from one Azure Blob Storage location to another. They provide the source blob URI and destination blob URI through the user interface, and the system initiates the copy operation while displaying real-time progress updates.",
+      "parent": 2734,
+      "children": [
+        2899,
+        2902,
+        2903,
+        2964,
+        2965,
+        2966,
+        2967,
+        2968,
+        2969,
+        2970,
+        2971,
+        2972,
+        2973,
+        2974,
+        2975,
+        2976,
+        2977,
+        2978,
+        2979,
+        2980,
+        2981,
+        2982,
+        2983,
+        2984,
+        2985
+      ],
+      "tags": [
+        "Speckit"
+      ],
+      "priority": 1,
+      "syncedAt": "2026-01-19T23:00:00Z",
+      "createdBy": "Speckit"
+    },
+    "2899": {
+      "id": 2899,
+      "type": "Task",
+      "title": "T020 - Implement CopyOperationManager",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:04.486781Z"
+    },
+    "2902": {
+      "id": 2902,
+      "type": "Task",
+      "title": "T024 - Implement BlobCopyService",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:05.038405Z"
+    },
+    "2903": {
+      "id": 2903,
+      "type": "Task",
+      "title": "T025 - Implement POST /api/BlobCopy/start endpoint",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:05.620931Z"
+    },
+    "2964": {
+      "id": 2964,
+      "type": "Task",
+      "title": "T021 - Implement IBlobClientFactory interface",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:06.162519Z"
+    },
+    "2965": {
+      "id": 2965,
+      "type": "Task",
+      "title": "T022 - Implement BlobClientFactory",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:06.707989Z"
+    },
+    "2966": {
+      "id": 2966,
+      "type": "Task",
+      "title": "T023 - Implement ProgressNotificationService",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:07.257445Z"
+    },
+    "2967": {
+      "id": 2967,
+      "type": "Task",
+      "title": "T026 - Implement GET /api/BlobCopy/status/{id} endpoint",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:07.795015Z"
+    },
+    "2968": {
+      "id": 2968,
+      "type": "Task",
+      "title": "T027 - Implement signalRService",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:08.397031Z"
+    },
+    "2969": {
+      "id": 2969,
+      "type": "Task",
+      "title": "T028 - Implement blobCopyApiService",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:08.947695Z"
+    },
+    "2970": {
+      "id": 2970,
+      "type": "Task",
+      "title": "T029 - Implement useSignalR custom hook",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:09.517808Z"
+    },
+    "2971": {
+      "id": 2971,
+      "type": "Task",
+      "title": "T030 - Implement useBlobCopy custom hook",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:10.039414Z"
+    },
+    "2972": {
+      "id": 2972,
+      "type": "Task",
+      "title": "T031 - Implement ProgressDisplay component",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:10.568192Z"
+    },
+    "2973": {
+      "id": 2973,
+      "type": "Task",
+      "title": "T032 - Implement CopyButton component",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:11.124031Z"
+    },
+    "2974": {
+      "id": 2974,
+      "type": "Task",
+      "title": "T033 - Implement BlobCopyForm component",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:11.694319Z"
+    },
+    "2975": {
+      "id": 2975,
+      "type": "Task",
+      "title": "T034 - Implement ResultMessage component",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:12.285983Z"
+    },
+    "2976": {
+      "id": 2976,
+      "type": "Task",
+      "title": "T035 - Wire up App.tsx with copy flow",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:12.817673Z"
+    },
+    "2977": {
+      "id": 2977,
+      "type": "Task",
+      "title": "T036 - Unit tests for BlobCopyService",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:13.356604Z"
+    },
+    "2978": {
+      "id": 2978,
+      "type": "Task",
+      "title": "T037 - Unit tests for ProgressNotificationService",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:13.875900Z"
+    },
+    "2979": {
+      "id": 2979,
+      "type": "Task",
+      "title": "T038 - Unit tests for CopyOperationManager",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:14.403006Z"
+    },
+    "2980": {
+      "id": 2980,
+      "type": "Task",
+      "title": "T039 - Unit tests for ProgressDisplay",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:14.961648Z"
+    },
+    "2981": {
+      "id": 2981,
+      "type": "Task",
+      "title": "T040 - Unit tests for useBlobCopy hook",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:15.509454Z"
+    },
+    "2982": {
+      "id": 2982,
+      "type": "Task",
+      "title": "T041 - Unit tests for useSignalR hook",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:16.064556Z"
+    },
+    "2983": {
+      "id": 2983,
+      "type": "Task",
+      "title": "T042 - Unit tests for blobCopyApiService",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:16.600064Z"
+    },
+    "2984": {
+      "id": 2984,
+      "type": "Task",
+      "title": "T043 - Playwright setup and config",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:17.135034Z"
+    },
+    "2985": {
+      "id": 2985,
+      "type": "Task",
+      "title": "T044 - E2E test for copy blob with progress flow",
+      "state": "Closed",
+      "parent": 2895,
+      "tags": [
+        "Speckit",
+        "US1",
+        "Phase3",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:17.706374Z"
+    },
+    "2896": {
+      "id": 2896,
+      "type": "User Story",
+      "title": "Handle Copy Failures Gracefully",
+      "state": "New",
+      "description": "When a copy operation fails (due to invalid URIs, authentication issues, network errors, etc.), the system displays a clear error message to the user indicating the reason for failure and provides guidance on recovery.",
+      "parent": 2734,
+      "children": [
+        2900,
+        2904,
+        2986,
+        2987,
+        2988,
+        2989,
+        2990,
+        2991,
+        2992,
+        2993,
+        2994,
+        2995,
+        2996,
+        2997,
+        2998,
+        2999,
+        3000
+      ],
+      "tags": [
+        "Speckit"
+      ],
+      "priority": 2,
+      "syncedAt": "2026-01-19T23:00:00Z",
+      "createdBy": "Speckit"
+    },
+    "2900": {
+      "id": 2900,
+      "type": "Task",
+      "title": "T045 - Enhance BlobCopyService with error handling",
+      "state": "Closed",
+      "parent": 2896,
+      "tags": [
+        "Speckit",
+        "US2",
+        "Phase4",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:18.287921Z"
+    },
+    "2904": {
+      "id": 2904,
+      "type": "Task",
+      "title": "T048 - Enhance ResultMessage component with error state",
+      "state": "Closed",
+      "parent": 2896,
+      "tags": [
+        "Speckit",
+        "US2",
+        "Phase4",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:18.800857Z"
+    },
+    "2986": {
+      "id": 2986,
+      "type": "Task",
+      "title": "T046 - Implement POST /api/BlobCopy/cancel/{id} endpoint",
+      "state": "Closed",
+      "parent": 2896,
+      "tags": [
+        "Speckit",
+        "US2",
+        "Phase4",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:19.338364Z"
+    },
+    "2987": {
+      "id": 2987,
+      "type": "Task",
+      "title": "T047 - Enhance error responses with proper HTTP status codes",
+      "state": "Closed",
+      "parent": 2896,
+      "tags": [
+        "Speckit",
+        "US2",
+        "Phase4",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:19.907951Z"
+    },
+    "2988": {
+      "id": 2988,
+      "type": "Task",
+      "title": "T049 - Add cancel operation support to useBlobCopy hook",
+      "state": "Closed",
+      "parent": 2896,
+      "tags": [
+        "Speckit",
+        "US2",
+        "Phase4",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:20.445440Z"
+    },
+    "2989": {
+      "id": 2989,
+      "type": "Task",
+      "title": "T050 - Add error handling to BlobCopyForm",
+      "state": "Closed",
+      "parent": 2896,
+      "tags": [
+        "Speckit",
+        "US2",
+        "Phase4",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:20.968100Z"
+    },
+    "2990": {
+      "id": 2990,
+      "type": "Task",
+      "title": "T051 - Unit tests for error handling in BlobCopyService",
+      "state": "Closed",
+      "parent": 2896,
+      "tags": [
+        "Speckit",
+        "US2",
+        "Phase4",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:21.513514Z"
+    },
+    "2991": {
+      "id": 2991,
+      "type": "Task",
+      "title": "T052 - Integration tests for error responses in BlobCopyController",
+      "state": "Closed",
+      "parent": 2896,
+      "tags": [
+        "Speckit",
+        "US2",
+        "Phase4",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:22.042872Z"
+    },
+    "2992": {
+      "id": 2992,
+      "type": "Task",
+      "title": "T053 - Unit tests for ResultMessage error state",
+      "state": "Closed",
+      "parent": 2896,
+      "tags": [
+        "Speckit",
+        "US2",
+        "Phase4",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:22.571396Z"
+    },
+    "2993": {
+      "id": 2993,
+      "type": "Task",
+      "title": "T054 - Unit tests for cancel operation in useBlobCopy",
+      "state": "Closed",
+      "parent": 2896,
+      "tags": [
+        "Speckit",
+        "US2",
+        "Phase4",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:23.102307Z"
+    },
+    "2994": {
+      "id": 2994,
+      "type": "Task",
+      "title": "T047b - Add destination-exists check to /start endpoint",
+      "state": "Closed",
+      "parent": 2896,
+      "tags": [
+        "Speckit",
+        "US2",
+        "Phase4",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:23.622245Z"
+    },
+    "2995": {
+      "id": 2995,
+      "type": "Task",
+      "title": "T048b - Implement OverwriteConfirmDialog component",
+      "state": "Closed",
+      "parent": 2896,
+      "tags": [
+        "Speckit",
+        "US2",
+        "Phase4",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:24.147745Z"
+    },
+    "2996": {
+      "id": 2996,
+      "type": "Task",
+      "title": "T049b - Add conflict resolution flow to useBlobCopy hook",
+      "state": "Closed",
+      "parent": 2896,
+      "tags": [
+        "Speckit",
+        "US2",
+        "Phase4",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:24.697361Z"
+    },
+    "2997": {
+      "id": 2997,
+      "type": "Task",
+      "title": "T053b - Unit tests for OverwriteConfirmDialog",
+      "state": "Closed",
+      "parent": 2896,
+      "tags": [
+        "Speckit",
+        "US2",
+        "Phase4",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:25.229216Z"
+    },
+    "2998": {
+      "id": 2998,
+      "type": "Task",
+      "title": "T055 - E2E test for error handling scenarios",
+      "state": "Closed",
+      "parent": 2896,
+      "tags": [
+        "Speckit",
+        "US2",
+        "Phase4",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:25.783360Z"
+    },
+    "2999": {
+      "id": 2999,
+      "type": "Task",
+      "title": "T055b - E2E test for destination conflict flow",
+      "state": "Closed",
+      "parent": 2896,
+      "tags": [
+        "Speckit",
+        "US2",
+        "Phase4",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:26.322321Z"
+    },
+    "3000": {
+      "id": 3000,
+      "type": "Task",
+      "title": "T056 - E2E test for cancel operation",
+      "state": "Closed",
+      "parent": 2896,
+      "tags": [
+        "Speckit",
+        "US2",
+        "Phase4",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:26.868023Z"
+    },
+    "2897": {
+      "id": 2897,
+      "type": "User Story",
+      "title": "Input Validation",
+      "state": "New",
+      "description": "The system validates the blob URIs provided by the user before attempting the copy operation, ensuring they are well-formed and point to valid Azure Blob Storage resources.",
+      "parent": 2734,
+      "children": [
+        2901,
+        2905,
+        3001,
+        3002,
+        3003,
+        3004,
+        3005,
+        3006,
+        3007,
+        3008,
+        3009
+      ],
+      "tags": [
+        "Speckit"
+      ],
+      "priority": 2,
+      "syncedAt": "2026-01-19T23:00:00Z",
+      "createdBy": "Speckit"
+    },
+    "2901": {
+      "id": 2901,
+      "type": "Task",
+      "title": "T057 - Implement BlobValidationService",
+      "state": "Closed",
+      "parent": 2897,
+      "tags": [
+        "Speckit",
+        "US3",
+        "Phase5",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:27.579425Z"
+    },
+    "2905": {
+      "id": 2905,
+      "type": "Task",
+      "title": "T061 - Enhance BlobCopyForm with client-side validation",
+      "state": "Closed",
+      "parent": 2897,
+      "tags": [
+        "Speckit",
+        "US3",
+        "Phase5",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:28.138117Z"
+    },
+    "3001": {
+      "id": 3001,
+      "type": "Task",
+      "title": "T058 - Implement POST /api/BlobCopy/validate endpoint",
+      "state": "Closed",
+      "parent": 2897,
+      "tags": [
+        "Speckit",
+        "US3",
+        "Phase5",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:28.691402Z"
+    },
+    "3002": {
+      "id": 3002,
+      "type": "Task",
+      "title": "T059 - Add validation to /start endpoint",
+      "state": "Closed",
+      "parent": 2897,
+      "tags": [
+        "Speckit",
+        "US3",
+        "Phase5",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:29.218500Z"
+    },
+    "3003": {
+      "id": 3003,
+      "type": "Task",
+      "title": "T060 - Implement uriValidationService",
+      "state": "Closed",
+      "parent": 2897,
+      "tags": [
+        "Speckit",
+        "US3",
+        "Phase5",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:29.790735Z"
+    },
+    "3004": {
+      "id": 3004,
+      "type": "Task",
+      "title": "T062 - Add server-side validation call before copy",
+      "state": "Closed",
+      "parent": 2897,
+      "tags": [
+        "Speckit",
+        "US3",
+        "Phase5",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:30.338149Z"
+    },
+    "3005": {
+      "id": 3005,
+      "type": "Task",
+      "title": "T063 - Unit tests for BlobValidationService",
+      "state": "Closed",
+      "parent": 2897,
+      "tags": [
+        "Speckit",
+        "US3",
+        "Phase5",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:30.932780Z"
+    },
+    "3006": {
+      "id": 3006,
+      "type": "Task",
+      "title": "T064 - Integration tests for /validate endpoint",
+      "state": "Closed",
+      "parent": 2897,
+      "tags": [
+        "Speckit",
+        "US3",
+        "Phase5",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:31.477426Z"
+    },
+    "3007": {
+      "id": 3007,
+      "type": "Task",
+      "title": "T065 - Unit tests for uriValidationService",
+      "state": "Closed",
+      "parent": 2897,
+      "tags": [
+        "Speckit",
+        "US3",
+        "Phase5",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:32.027369Z"
+    },
+    "3008": {
+      "id": 3008,
+      "type": "Task",
+      "title": "T066 - Unit tests for BlobCopyForm validation",
+      "state": "Closed",
+      "parent": 2897,
+      "tags": [
+        "Speckit",
+        "US3",
+        "Phase5",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:32.550947Z"
+    },
+    "3009": {
+      "id": 3009,
+      "type": "Task",
+      "title": "T067 - E2E test for input validation",
+      "state": "Closed",
+      "parent": 2897,
+      "tags": [
+        "Speckit",
+        "US3",
+        "Phase5",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:33.074159Z"
+    },
+    "3010": {
+      "id": 3010,
+      "type": "User Story",
+      "title": "Foundational Setup for System Operations",
+      "state": "New",
+      "description": "The system requires foundational infrastructure, configuration, and environment preparation to support all upcoming functionality. This includes establishing the project structure, initializing required services, configuring authentication and access, and ensuring that the application can reliably run and interact with its dependencies before any user-facing features are implemented.",
+      "parent": 2734,
+      "children": [
+        2930,
+        2931,
+        2932,
+        2933,
+        2934,
+        2935,
+        2936,
+        2937,
+        2938,
+        2939,
+        2940,
+        2941,
+        2942,
+        2943,
+        2944,
+        2945,
+        2946,
+        2947,
+        2948,
+        2949,
+        2950,
+        2951,
+        2952,
+        2953,
+        2954,
+        2955,
+        2956,
+        2957,
+        2958,
+        2959,
+        2960,
+        2961,
+        2962,
+        2963
+      ],
+      "tags": [
+        "Speckit"
+      ],
+      "priority": 1,
+      "syncedAt": "2026-01-19T23:30:00Z",
+      "createdBy": "Speckit"
+    },
+    "2930": {
+      "id": 2930,
+      "type": "Task",
+      "title": "T001 - Create project structure per plan.md",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase1",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:33.604962Z"
+    },
+    "2931": {
+      "id": 2931,
+      "type": "Task",
+      "title": "T002 - Initialize .NET 10 backend project",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase1",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:34.219589Z"
+    },
+    "2932": {
+      "id": 2932,
+      "type": "Task",
+      "title": "T003 - Initialize React 18+ frontend project",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase1",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:34.767802Z"
+    },
+    "2933": {
+      "id": 2933,
+      "type": "Task",
+      "title": "T004 - Configure ESLint, Prettier for frontend",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase1",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:35.301164Z"
+    },
+    "2934": {
+      "id": 2934,
+      "type": "Task",
+      "title": "T005 - Configure EditorConfig and code style for backend",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase1",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:35.841317Z"
+    },
+    "2935": {
+      "id": 2935,
+      "type": "Task",
+      "title": "T006 - Create BlobCopyOperation model",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase2",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:36.385431Z"
+    },
+    "2936": {
+      "id": 2936,
+      "type": "Task",
+      "title": "T007 - Create BlobCopyStatus enum",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase2",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:36.934775Z"
+    },
+    "2937": {
+      "id": 2937,
+      "type": "Task",
+      "title": "T008 - Create ProgressUpdate model",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase2",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:37.461477Z"
+    },
+    "2938": {
+      "id": 2938,
+      "type": "Task",
+      "title": "T009 - Create ValidationError model",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase2",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:37.984954Z"
+    },
+    "2939": {
+      "id": 2939,
+      "type": "Task",
+      "title": "T010 - Create CopyRequest DTO",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase2",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:38.518985Z"
+    },
+    "2940": {
+      "id": 2940,
+      "type": "Task",
+      "title": "T011 - Create ValidationResult model",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase2",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:39.138550Z"
+    },
+    "2941": {
+      "id": 2941,
+      "type": "Task",
+      "title": "T011b - Create CopyResult model",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase2",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:39.655818Z"
+    },
+    "2942": {
+      "id": 2942,
+      "type": "Task",
+      "title": "T012 - Create TypeScript interfaces",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase2",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:40.203025Z"
+    },
+    "2943": {
+      "id": 2943,
+      "type": "Task",
+      "title": "T013 - Create IBlobCopyClient interface",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase2",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:40.736309Z"
+    },
+    "2944": {
+      "id": 2944,
+      "type": "Task",
+      "title": "T014 - Implement BlobCopyHub SignalR hub",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase2",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:41.278411Z"
+    },
+    "2945": {
+      "id": 2945,
+      "type": "Task",
+      "title": "T015 - Configure DI container, CORS, SignalR mapping",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase2",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:41.849695Z"
+    },
+    "2946": {
+      "id": 2946,
+      "type": "Task",
+      "title": "T016 - Create appsettings.json with Azure Storage config",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase2",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:42.373131Z"
+    },
+    "2947": {
+      "id": 2947,
+      "type": "Task",
+      "title": "T017 - Create appsettings.Development.json for local dev",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase2",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:42.902785Z"
+    },
+    "2948": {
+      "id": 2948,
+      "type": "Task",
+      "title": "T018 - Implement ErrorHandlingMiddleware",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase2",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:43.480127Z"
+    },
+    "2949": {
+      "id": 2949,
+      "type": "Task",
+      "title": "T019 - Implement HealthController with GET /api/v1/health",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase2",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:44.037706Z"
+    },
+    "2950": {
+      "id": 2950,
+      "type": "Task",
+      "title": "T068 - Full integration tests for BlobCopyController",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase6",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:44.574425Z"
+    },
+    "2951": {
+      "id": 2951,
+      "type": "Task",
+      "title": "T069 - API contract validation tests",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase6",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:45.104904Z"
+    },
+    "2952": {
+      "id": 2952,
+      "type": "Task",
+      "title": "T070 - E2E test for WCAG AA accessibility",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase6",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:45.631568Z"
+    },
+    "2953": {
+      "id": 2953,
+      "type": "Task",
+      "title": "T071 - E2E test for health check endpoint",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase6",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:46.157665Z"
+    },
+    "2954": {
+      "id": 2954,
+      "type": "Task",
+      "title": "T072 - Create/update OpenAPI spec",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase6",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:46.693456Z"
+    },
+    "2955": {
+      "id": 2955,
+      "type": "Task",
+      "title": "T073 - Create GitHub Actions CI/CD workflow",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase6",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:47.246152Z"
+    },
+    "2956": {
+      "id": 2956,
+      "type": "Task",
+      "title": "T074 - Update quickstart.md with final setup instructions",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase6",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:47.781781Z"
+    },
+    "2957": {
+      "id": 2957,
+      "type": "Task",
+      "title": "T075 - Integrate Application Insights in backend",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase6",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:48.360193Z"
+    },
+    "2958": {
+      "id": 2958,
+      "type": "Task",
+      "title": "T076 - Integrate Application Insights in frontend",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase6",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:48.898360Z"
+    },
+    "2959": {
+      "id": 2959,
+      "type": "Task",
+      "title": "T079 - Add performance benchmark for /validate endpoint",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase6",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:49.443784Z"
+    },
+    "2960": {
+      "id": 2960,
+      "type": "Task",
+      "title": "T080 - Add performance benchmark for copy operation",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase6",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:50.002073Z"
+    },
+    "2961": {
+      "id": 2961,
+      "type": "Task",
+      "title": "T081 - Configure performance test execution in CI",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase6",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:50.557696Z"
+    },
+    "2962": {
+      "id": 2962,
+      "type": "Task",
+      "title": "T082 - Create Terraform infrastructure files",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase6",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:51.080940Z"
+    },
+    "2963": {
+      "id": 2963,
+      "type": "Task",
+      "title": "T083 - Create deployment documentation",
+      "state": "Closed",
+      "parent": 3010,
+      "tags": [
+        "Speckit",
+        "US0",
+        "Phase6",
+        "Parallel",
+        "Completed"
+      ],
+      "syncedAt": "2026-01-21T02:43:51.609847Z"
+    }
+  },
+  "drift": {
+    "intentDrift": [],
+    "executionDrift": []
+  },
+  "changelog": [
+    {
+      "timestamp": "2026-01-21T02:24:13.421661Z",
+      "action": "migrate",
+      "note": "Migrated from root mirror. Contains 92 work items for feature 001-blob-copy."
+    },
+    {
+      "timestamp": "2026-01-21T02:43:51.609884Z",
+      "action": "sync_task_states",
+      "changes": {
+        "task_ids": [
+          2899,
+          2902,
+          2903,
+          2964,
+          2965,
+          2966,
+          2967,
+          2968,
+          2969,
+          2970,
+          2971,
+          2972,
+          2973,
+          2974,
+          2975,
+          2976,
+          2977,
+          2978,
+          2979,
+          2980,
+          2981,
+          2982,
+          2983,
+          2984,
+          2985,
+          2900,
+          2904,
+          2986,
+          2987,
+          2988,
+          2989,
+          2990,
+          2991,
+          2992,
+          2993,
+          2994,
+          2995,
+          2996,
+          2997,
+          2998,
+          2999,
+          3000,
+          2901,
+          2905,
+          3001,
+          3002,
+          3003,
+          3004,
+          3005,
+          3006,
+          3007,
+          3008,
+          3009,
+          2930,
+          2931,
+          2932,
+          2933,
+          2934,
+          2935,
+          2936,
+          2937,
+          2938,
+          2939,
+          2940,
+          2941,
+          2942,
+          2943,
+          2944,
+          2945,
+          2946,
+          2947,
+          2948,
+          2949,
+          2950,
+          2951,
+          2952,
+          2953,
+          2954,
+          2955,
+          2956,
+          2957,
+          2958,
+          2959,
+          2960,
+          2961,
+          2962,
+          2963
+        ],
+        "state_transition": "New -> Closed",
+        "reason": "Syncing completed tasks from Spec-Kit to ADO"
+      },
+      "note": "Updated 87 completed tasks to Closed state in ADO"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "lastSync": "2026-01-20T23:28:15.928170Z",
+  "lastSync": "2026-01-21T02:24:13.423660Z",
   "organization": "qcellsces",
   "project": "test-project-tony",
   "workItems": {
@@ -15,6 +15,1023 @@
       ],
       "tags": [],
       "syncedAt": "2026-01-19T22:16:15.12Z"
+    },
+    "3058": {
+      "id": 3058,
+      "type": "Feature",
+      "title": "Login",
+      "state": "New",
+      "description": "Updated with full specification content",
+      "parent": null,
+      "children": [
+        3211,
+        3067,
+        3068,
+        3069
+      ],
+      "tags": [],
+      "syncedAt": "2026-01-20T18:41:15Z"
+    },
+    "3067": {
+      "id": 3067,
+      "type": "User Story",
+      "title": "User Login with Entra ID",
+      "state": "New",
+      "description": "A user visits the application and is presented with a login page. They click a 'Sign in with Microsoft' button, are redirected to Entra ID for authentication, and upon successful authentication are redirected back to the blob copy page with an authenticated session.",
+      "parent": 3058,
+      "children": [
+        3117,
+        3118,
+        3119,
+        3120,
+        3121,
+        3122,
+        3123,
+        3124,
+        3125,
+        3126,
+        3127,
+        3128,
+        3129,
+        3130,
+        3131,
+        3132,
+        3133,
+        3134,
+        3135,
+        3136,
+        3137
+      ],
+      "tags": [
+        "Speckit"
+      ],
+      "priority": 1,
+      "syncedAt": "2026-01-20T18:41:15Z",
+      "createdBy": "Speckit"
+    },
+    "3068": {
+      "id": 3068,
+      "type": "User Story",
+      "title": "Handle Authentication Failures",
+      "state": "New",
+      "description": "When authentication fails (due to invalid credentials, cancelled login, network issues, etc.), the system displays a clear error message to the user and provides guidance on recovery.",
+      "parent": 3058,
+      "children": [
+        3138,
+        3139,
+        3140,
+        3141,
+        3142,
+        3143,
+        3144,
+        3145,
+        3146,
+        3147
+      ],
+      "tags": [
+        "Speckit"
+      ],
+      "priority": 2,
+      "syncedAt": "2026-01-20T18:41:15Z",
+      "createdBy": "Speckit"
+    },
+    "3069": {
+      "id": 3069,
+      "type": "User Story",
+      "title": "Session Management",
+      "state": "New",
+      "description": "The application maintains the user's authenticated session, validates tokens, handles token refresh, and provides logout functionality.",
+      "parent": 3058,
+      "children": [
+        3148,
+        3149,
+        3150,
+        3151,
+        3152,
+        3153,
+        3154,
+        3155,
+        3156,
+        3157,
+        3158,
+        3159,
+        3160,
+        3161,
+        3162
+      ],
+      "tags": [
+        "Speckit"
+      ],
+      "priority": 2,
+      "syncedAt": "2026-01-20T18:41:15Z",
+      "createdBy": "Speckit"
+    },
+    "3103": {
+      "id": 3103,
+      "type": "Task",
+      "title": "T001: Install backend NuGet packages: Microsoft.AspNetCore.Authentication.JwtBearer (9.0.0), Microsoft.Ide",
+      "state": "New",
+      "description": "Install backend NuGet packages: Microsoft.AspNetCore.Authentication.JwtBearer (9.0.0), Microsoft.Identity.Web (2.15.0), Microsoft.Graph (5.35.0)",
+      "parent": 3211,
+      "tags": [
+        "Speckit",
+        "US0"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3104": {
+      "id": 3104,
+      "type": "Task",
+      "title": "T002: Install frontend npm packages: @azure/msal-react (^3.0.0), @azure/msal-browser (^3.0.0)",
+      "state": "New",
+      "description": "Install frontend npm packages: @azure/msal-react (^3.0.0), @azure/msal-browser (^3.0.0)",
+      "parent": 3211,
+      "tags": [
+        "Speckit",
+        "US0"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3106": {
+      "id": 3106,
+      "type": "Task",
+      "title": "T003: Create Entra ID application registration following `specs/002-login/quickstart.md` steps 1-6",
+      "state": "New",
+      "description": "Create Entra ID application registration following `specs/002-login/quickstart.md` steps 1-6",
+      "parent": 3211,
+      "tags": [
+        "Speckit",
+        "US0"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3107": {
+      "id": 3107,
+      "type": "Task",
+      "title": "T004: Configure backend `appsettings.Development.json` with Entra ID credentials (TenantId, ClientId, Clie",
+      "state": "New",
+      "description": "Configure backend `appsettings.Development.json` with Entra ID credentials (TenantId, ClientId, ClientSecret)",
+      "parent": 3211,
+      "tags": [
+        "Speckit",
+        "US0"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3108": {
+      "id": 3108,
+      "type": "Task",
+      "title": "T005: Configure frontend `.env.local` with Entra ID configuration (VITE_ENTRA_TENANT_ID, VITE_ENTRA_CLIENT",
+      "state": "New",
+      "description": "Configure frontend `.env.local` with Entra ID configuration (VITE_ENTRA_TENANT_ID, VITE_ENTRA_CLIENT_ID, VITE_REDIRECT_URI)",
+      "parent": 3211,
+      "tags": [
+        "Speckit",
+        "US0"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3109": {
+      "id": 3109,
+      "type": "Task",
+      "title": "T006: Create EntraIdOptions configuration class in `src/backend/BlobCopy.API/Configuration/EntraIdOptions.",
+      "state": "New",
+      "description": "Create EntraIdOptions configuration class in `src/backend/BlobCopy.API/Configuration/EntraIdOptions.cs`",
+      "parent": 3211,
+      "tags": [
+        "Speckit",
+        "US0"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3110": {
+      "id": 3110,
+      "type": "Task",
+      "title": "T007: Create UserSession model in `src/backend/BlobCopy.API/Models/UserSession.cs` (per data-model.md)",
+      "state": "New",
+      "description": "Create UserSession model in `src/backend/BlobCopy.API/Models/UserSession.cs` (per data-model.md)",
+      "parent": 3211,
+      "tags": [
+        "Speckit",
+        "US0"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3111": {
+      "id": 3111,
+      "type": "Task",
+      "title": "T008: Create AuthenticationToken model in `src/backend/BlobCopy.API/Models/AuthenticationToken.cs` (per da",
+      "state": "New",
+      "description": "Create AuthenticationToken model in `src/backend/BlobCopy.API/Models/AuthenticationToken.cs` (per data-model.md)",
+      "parent": 3211,
+      "tags": [
+        "Speckit",
+        "US0"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3112": {
+      "id": 3112,
+      "type": "Task",
+      "title": "T009: Create AuthenticationResult model in `src/backend/BlobCopy.API/Models/AuthenticationResult.cs` (per ",
+      "state": "New",
+      "description": "Create AuthenticationResult model in `src/backend/BlobCopy.API/Models/AuthenticationResult.cs` (per data-model.md)",
+      "parent": 3211,
+      "tags": [
+        "Speckit",
+        "US0"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3113": {
+      "id": 3113,
+      "type": "Task",
+      "title": "T010: Configure JWT authentication in `src/backend/BlobCopy.API/Program.cs` (add authentication services, ",
+      "state": "New",
+      "description": "Configure JWT authentication in `src/backend/BlobCopy.API/Program.cs` (add authentication services, JWT Bearer configuration)",
+      "parent": 3211,
+      "tags": [
+        "Speckit",
+        "US0"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3114": {
+      "id": 3114,
+      "type": "Task",
+      "title": "T011: Create MSAL configuration in `src/frontend/src/auth/authConfig.ts` with PublicClientApplication setu",
+      "state": "New",
+      "description": "Create MSAL configuration in `src/frontend/src/auth/authConfig.ts` with PublicClientApplication setup",
+      "parent": 3211,
+      "tags": [
+        "Speckit",
+        "US0"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3115": {
+      "id": 3115,
+      "type": "Task",
+      "title": "T012: Create React auth context in `src/frontend/src/auth/authContext.tsx` with MsalProvider wrapper",
+      "state": "New",
+      "description": "Create React auth context in `src/frontend/src/auth/authContext.tsx` with MsalProvider wrapper",
+      "parent": 3211,
+      "tags": [
+        "Speckit",
+        "US0"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3116": {
+      "id": 3116,
+      "type": "Task",
+      "title": "T013: Create useAuth custom hook in `src/frontend/src/auth/useAuth.ts` for auth state and operations",
+      "state": "New",
+      "description": "Create useAuth custom hook in `src/frontend/src/auth/useAuth.ts` for auth state and operations",
+      "parent": 3211,
+      "tags": [
+        "Speckit",
+        "US0"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3117": {
+      "id": 3117,
+      "type": "Task",
+      "title": "T014: Create IAuthenticationService interface in `src/backend/BlobCopy.API/Services/IAuthenticationService",
+      "state": "New",
+      "description": "Create IAuthenticationService interface in `src/backend/BlobCopy.API/Services/IAuthenticationService.cs`",
+      "parent": 3067,
+      "tags": [
+        "Speckit",
+        "US1"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3118": {
+      "id": 3118,
+      "type": "Task",
+      "title": "T015: Implement AuthenticationService in `src/backend/BlobCopy.API/Services/AuthenticationService.cs` (tok",
+      "state": "New",
+      "description": "Implement AuthenticationService in `src/backend/BlobCopy.API/Services/AuthenticationService.cs` (token exchange, validation, user info extraction)",
+      "parent": 3067,
+      "tags": [
+        "Speckit",
+        "US1"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3119": {
+      "id": 3119,
+      "type": "Task",
+      "title": "T016: Create IUserService interface in `src/backend/BlobCopy.API/Services/IUserService.cs`",
+      "state": "New",
+      "description": "Create IUserService interface in `src/backend/BlobCopy.API/Services/IUserService.cs`",
+      "parent": 3067,
+      "tags": [
+        "Speckit",
+        "US1"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3120": {
+      "id": 3120,
+      "type": "Task",
+      "title": "T017: Implement UserService in `src/backend/BlobCopy.API/Services/UserService.cs` (extract user claims fro",
+      "state": "New",
+      "description": "Implement UserService in `src/backend/BlobCopy.API/Services/UserService.cs` (extract user claims from JWT, fetch avatar from Microsoft Graph)",
+      "parent": 3067,
+      "tags": [
+        "Speckit",
+        "US1"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3121": {
+      "id": 3121,
+      "type": "Task",
+      "title": "T018: Create AuthController in `src/backend/BlobCopy.API/Controllers/AuthController.cs` with Login endpoin",
+      "state": "New",
+      "description": "Create AuthController in `src/backend/BlobCopy.API/Controllers/AuthController.cs` with Login endpoint (GET /auth/login)",
+      "parent": 3067,
+      "tags": [
+        "Speckit",
+        "US1"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3122": {
+      "id": 3122,
+      "type": "Task",
+      "title": "T019: Implement OAuth callback handler in AuthController (GET /auth/callback) - exchange authorization cod",
+      "state": "New",
+      "description": "Implement OAuth callback handler in AuthController (GET /auth/callback) - exchange authorization code for tokens",
+      "parent": 3067,
+      "tags": [
+        "Speckit",
+        "US1"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3123": {
+      "id": 3123,
+      "type": "Task",
+      "title": "T020: Create UserController in `src/backend/BlobCopy.API/Controllers/UserController.cs` with GetCurrentUse",
+      "state": "New",
+      "description": "Create UserController in `src/backend/BlobCopy.API/Controllers/UserController.cs` with GetCurrentUser endpoint (GET /api/user/me)",
+      "parent": 3067,
+      "tags": [
+        "Speckit",
+        "US1"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3124": {
+      "id": 3124,
+      "type": "Task",
+      "title": "T021: Create AuthenticationMiddleware in `src/backend/BlobCopy.API/Middleware/AuthenticationMiddleware.cs`",
+      "state": "New",
+      "description": "Create AuthenticationMiddleware in `src/backend/BlobCopy.API/Middleware/AuthenticationMiddleware.cs` to redirect unauthenticated requests (FR-001, FR-013)",
+      "parent": 3067,
+      "tags": [
+        "Speckit",
+        "US1"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3125": {
+      "id": 3125,
+      "type": "Task",
+      "title": "T022: Register authentication services in `src/backend/BlobCopy.API/Program.cs` (dependency injection for ",
+      "state": "New",
+      "description": "Register authentication services in `src/backend/BlobCopy.API/Program.cs` (dependency injection for IAuthenticationService, IUserService)",
+      "parent": 3067,
+      "tags": [
+        "Speckit",
+        "US1"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3126": {
+      "id": 3126,
+      "type": "Task",
+      "title": "T023: Create LoginButton component in `src/frontend/src/components/LoginButton.tsx`",
+      "state": "New",
+      "description": "Create LoginButton component in `src/frontend/src/components/LoginButton.tsx`",
+      "parent": 3067,
+      "tags": [
+        "Speckit",
+        "US1"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3127": {
+      "id": 3127,
+      "type": "Task",
+      "title": "T024: Create UserProfile component in `src/frontend/src/components/UserProfile.tsx` to display name, email",
+      "state": "New",
+      "description": "Create UserProfile component in `src/frontend/src/components/UserProfile.tsx` to display name, email, avatar",
+      "parent": 3067,
+      "tags": [
+        "Speckit",
+        "US1"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3128": {
+      "id": 3128,
+      "type": "Task",
+      "title": "T025: Create ProtectedRoute component in `src/frontend/src/components/ProtectedRoute.tsx` for route guardi",
+      "state": "New",
+      "description": "Create ProtectedRoute component in `src/frontend/src/components/ProtectedRoute.tsx` for route guarding",
+      "parent": 3067,
+      "tags": [
+        "Speckit",
+        "US1"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3129": {
+      "id": 3129,
+      "type": "Task",
+      "title": "T026: Create LoginPage in `src/frontend/src/pages/LoginPage.tsx` with \"Sign in with Microsoft\" button",
+      "state": "New",
+      "description": "Create LoginPage in `src/frontend/src/pages/LoginPage.tsx` with \"Sign in with Microsoft\" button",
+      "parent": 3067,
+      "tags": [
+        "Speckit",
+        "US1"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3130": {
+      "id": 3130,
+      "type": "Task",
+      "title": "T027: Configure React Router to protect all routes and redirect unauthenticated users to /login",
+      "state": "New",
+      "description": "Configure React Router to protect all routes and redirect unauthenticated users to /login",
+      "parent": 3067,
+      "tags": [
+        "Speckit",
+        "US1"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3131": {
+      "id": 3131,
+      "type": "Task",
+      "title": "T028: Create API client with token injection in `src/frontend/src/services/apiClient.ts` (Axios intercepto",
+      "state": "New",
+      "description": "Create API client with token injection in `src/frontend/src/services/apiClient.ts` (Axios interceptor for Authorization header)",
+      "parent": 3067,
+      "tags": [
+        "Speckit",
+        "US1"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3132": {
+      "id": 3132,
+      "type": "Task",
+      "title": "T029: Integrate UserProfile component into application header/nav bar to display authenticated user info",
+      "state": "New",
+      "description": "Integrate UserProfile component into application header/nav bar to display authenticated user info",
+      "parent": 3067,
+      "tags": [
+        "Speckit",
+        "US1"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3133": {
+      "id": 3133,
+      "type": "Task",
+      "title": "T030: Write unit tests for AuthenticationService in `src/backend/BlobCopy.Tests/Services/AuthenticationSer",
+      "state": "New",
+      "description": "Write unit tests for AuthenticationService in `src/backend/BlobCopy.Tests/Services/AuthenticationServiceTests.cs`",
+      "parent": 3067,
+      "tags": [
+        "Speckit",
+        "US1"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3134": {
+      "id": 3134,
+      "type": "Task",
+      "title": "T031: Write unit tests for AuthController in `src/backend/BlobCopy.Tests/Controllers/AuthControllerTests.c",
+      "state": "New",
+      "description": "Write unit tests for AuthController in `src/backend/BlobCopy.Tests/Controllers/AuthControllerTests.cs`",
+      "parent": 3067,
+      "tags": [
+        "Speckit",
+        "US1"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3135": {
+      "id": 3135,
+      "type": "Task",
+      "title": "T032: Write React component tests for LoginButton in `src/frontend/tests/unit/auth/LoginButton.test.tsx`",
+      "state": "New",
+      "description": "Write React component tests for LoginButton in `src/frontend/tests/unit/auth/LoginButton.test.tsx`",
+      "parent": 3067,
+      "tags": [
+        "Speckit",
+        "US1"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3136": {
+      "id": 3136,
+      "type": "Task",
+      "title": "T033: Write React component tests for UserProfile in `src/frontend/tests/unit/auth/UserProfile.test.tsx`",
+      "state": "New",
+      "description": "Write React component tests for UserProfile in `src/frontend/tests/unit/auth/UserProfile.test.tsx`",
+      "parent": 3067,
+      "tags": [
+        "Speckit",
+        "US1"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3137": {
+      "id": 3137,
+      "type": "Task",
+      "title": "T034: Write E2E test for complete login flow in `src/frontend/tests/e2e/auth.spec.ts` (Playwright)",
+      "state": "New",
+      "description": "Write E2E test for complete login flow in `src/frontend/tests/e2e/auth.spec.ts` (Playwright)",
+      "parent": 3067,
+      "tags": [
+        "Speckit",
+        "US1"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3138": {
+      "id": 3138,
+      "type": "Task",
+      "title": "T035: Add error handling to AuthController callback endpoint - map Entra ID error codes to user-friendly m",
+      "state": "New",
+      "description": "Add error handling to AuthController callback endpoint - map Entra ID error codes to user-friendly messages (per data-model.md error mapping)",
+      "parent": 3068,
+      "tags": [
+        "Speckit",
+        "US2"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3139": {
+      "id": 3139,
+      "type": "Task",
+      "title": "T036: Implement CSRF state validation in AuthController callback (FR-015) - return error if state paramete",
+      "state": "New",
+      "description": "Implement CSRF state validation in AuthController callback (FR-015) - return error if state parameter mismatch",
+      "parent": 3068,
+      "tags": [
+        "Speckit",
+        "US2"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3140": {
+      "id": 3140,
+      "type": "Task",
+      "title": "T037: Add error logging to AuthenticationService without exposing sensitive information (NFR-005)",
+      "state": "New",
+      "description": "Add error logging to AuthenticationService without exposing sensitive information (NFR-005)",
+      "parent": 3068,
+      "tags": [
+        "Speckit",
+        "US2"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3141": {
+      "id": 3141,
+      "type": "Task",
+      "title": "T038: Create ErrorPage component in `src/frontend/src/pages/ErrorPage.tsx` to display authentication error",
+      "state": "New",
+      "description": "Create ErrorPage component in `src/frontend/src/pages/ErrorPage.tsx` to display authentication errors with retry button",
+      "parent": 3068,
+      "tags": [
+        "Speckit",
+        "US2"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3142": {
+      "id": 3142,
+      "type": "Task",
+      "title": "T039: Add error handling to useAuth hook for InteractionRequiredAuthError and other MSAL errors",
+      "state": "New",
+      "description": "Add error handling to useAuth hook for InteractionRequiredAuthError and other MSAL errors",
+      "parent": 3068,
+      "tags": [
+        "Speckit",
+        "US2"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3143": {
+      "id": 3143,
+      "type": "Task",
+      "title": "T040: Implement error state display in LoginPage for authentication failures (user cancelled, invalid cred",
+      "state": "New",
+      "description": "Implement error state display in LoginPage for authentication failures (user cancelled, invalid credentials, network error)",
+      "parent": 3068,
+      "tags": [
+        "Speckit",
+        "US2"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3144": {
+      "id": 3144,
+      "type": "Task",
+      "title": "T041: Add network error detection and user-friendly messaging in apiClient.ts",
+      "state": "New",
+      "description": "Add network error detection and user-friendly messaging in apiClient.ts",
+      "parent": 3068,
+      "tags": [
+        "Speckit",
+        "US2"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3145": {
+      "id": 3145,
+      "type": "Task",
+      "title": "T042: Write unit tests for error scenarios in AuthenticationService tests",
+      "state": "New",
+      "description": "Write unit tests for error scenarios in AuthenticationService tests",
+      "parent": 3068,
+      "tags": [
+        "Speckit",
+        "US2"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3146": {
+      "id": 3146,
+      "type": "Task",
+      "title": "T043: Write React component tests for ErrorPage in `src/frontend/tests/unit/pages/ErrorPage.test.tsx`",
+      "state": "New",
+      "description": "Write React component tests for ErrorPage in `src/frontend/tests/unit/pages/ErrorPage.test.tsx`",
+      "parent": 3068,
+      "tags": [
+        "Speckit",
+        "US2"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3147": {
+      "id": 3147,
+      "type": "Task",
+      "title": "T044: Write E2E test for cancelled login flow in `src/frontend/tests/e2e/auth-errors.spec.ts`",
+      "state": "New",
+      "description": "Write E2E test for cancelled login flow in `src/frontend/tests/e2e/auth-errors.spec.ts`",
+      "parent": 3068,
+      "tags": [
+        "Speckit",
+        "US2"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3148": {
+      "id": 3148,
+      "type": "Task",
+      "title": "T045: Implement token refresh endpoint in AuthController (POST /auth/refresh) - exchange refresh token for",
+      "state": "New",
+      "description": "Implement token refresh endpoint in AuthController (POST /auth/refresh) - exchange refresh token for new access token",
+      "parent": 3069,
+      "tags": [
+        "Speckit",
+        "US3"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3149": {
+      "id": 3149,
+      "type": "Task",
+      "title": "T046: Implement logout endpoint in AuthController (POST /auth/logout) - clear cookies, invalidate tokens, ",
+      "state": "New",
+      "description": "Implement logout endpoint in AuthController (POST /auth/logout) - clear cookies, invalidate tokens, redirect to login",
+      "parent": 3069,
+      "tags": [
+        "Speckit",
+        "US3"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3150": {
+      "id": 3150,
+      "type": "Task",
+      "title": "T047: Configure refresh token as HttpOnly cookie in callback handler (NFR-003) - set Secure, SameSite=Stri",
+      "state": "New",
+      "description": "Configure refresh token as HttpOnly cookie in callback handler (NFR-003) - set Secure, SameSite=Strict, Path=/auth/refresh",
+      "parent": 3069,
+      "tags": [
+        "Speckit",
+        "US3"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3151": {
+      "id": 3151,
+      "type": "Task",
+      "title": "T048: Add token expiration validation middleware to reject expired tokens on all protected endpoints",
+      "state": "New",
+      "description": "Add token expiration validation middleware to reject expired tokens on all protected endpoints",
+      "parent": 3069,
+      "tags": [
+        "Speckit",
+        "US3"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3152": {
+      "id": 3152,
+      "type": "Task",
+      "title": "T049: Create LogoutButton component in `src/frontend/src/components/LogoutButton.tsx`",
+      "state": "New",
+      "description": "Create LogoutButton component in `src/frontend/src/components/LogoutButton.tsx`",
+      "parent": 3069,
+      "tags": [
+        "Speckit",
+        "US3"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3153": {
+      "id": 3153,
+      "type": "Task",
+      "title": "T050: Implement automatic token refresh logic in useAuth hook - trigger refresh at 5 minutes before expira",
+      "state": "New",
+      "description": "Implement automatic token refresh logic in useAuth hook - trigger refresh at 5 minutes before expiration (SC-004)",
+      "parent": 3069,
+      "tags": [
+        "Speckit",
+        "US3"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3154": {
+      "id": 3154,
+      "type": "Task",
+      "title": "T051: Add session persistence on page refresh using MSAL acquireTokenSilent in authContext",
+      "state": "New",
+      "description": "Add session persistence on page refresh using MSAL acquireTokenSilent in authContext",
+      "parent": 3069,
+      "tags": [
+        "Speckit",
+        "US3"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3155": {
+      "id": 3155,
+      "type": "Task",
+      "title": "T052: Implement logout functionality in useAuth hook - call backend /auth/logout, clear MSAL cache, redire",
+      "state": "New",
+      "description": "Implement logout functionality in useAuth hook - call backend /auth/logout, clear MSAL cache, redirect to login",
+      "parent": 3069,
+      "tags": [
+        "Speckit",
+        "US3"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3156": {
+      "id": 3156,
+      "type": "Task",
+      "title": "T053: Add LogoutButton to application header/nav bar next to UserProfile",
+      "state": "New",
+      "description": "Add LogoutButton to application header/nav bar next to UserProfile",
+      "parent": 3069,
+      "tags": [
+        "Speckit",
+        "US3"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3157": {
+      "id": 3157,
+      "type": "Task",
+      "title": "T054: Add session expired handling - detect failed refresh, show message, redirect to login",
+      "state": "New",
+      "description": "Add session expired handling - detect failed refresh, show message, redirect to login",
+      "parent": 3069,
+      "tags": [
+        "Speckit",
+        "US3"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3158": {
+      "id": 3158,
+      "type": "Task",
+      "title": "T055: Write unit tests for token refresh logic in AuthenticationService tests",
+      "state": "New",
+      "description": "Write unit tests for token refresh logic in AuthenticationService tests",
+      "parent": 3069,
+      "tags": [
+        "Speckit",
+        "US3"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3159": {
+      "id": 3159,
+      "type": "Task",
+      "title": "T056: Write unit tests for logout endpoint in AuthController tests",
+      "state": "New",
+      "description": "Write unit tests for logout endpoint in AuthController tests",
+      "parent": 3069,
+      "tags": [
+        "Speckit",
+        "US3"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3160": {
+      "id": 3160,
+      "type": "Task",
+      "title": "T057: Write React tests for LogoutButton component",
+      "state": "New",
+      "description": "Write React tests for LogoutButton component",
+      "parent": 3069,
+      "tags": [
+        "Speckit",
+        "US3"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3161": {
+      "id": 3161,
+      "type": "Task",
+      "title": "T058: Write E2E test for logout flow in `src/frontend/tests/e2e/auth-logout.spec.ts`",
+      "state": "New",
+      "description": "Write E2E test for logout flow in `src/frontend/tests/e2e/auth-logout.spec.ts`",
+      "parent": 3069,
+      "tags": [
+        "Speckit",
+        "US3"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3162": {
+      "id": 3162,
+      "type": "Task",
+      "title": "T059: Write E2E test for session persistence across page refresh",
+      "state": "New",
+      "description": "Write E2E test for session persistence across page refresh",
+      "parent": 3069,
+      "tags": [
+        "Speckit",
+        "US3"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3163": {
+      "id": 3163,
+      "type": "Task",
+      "title": "T060: Add Application Insights telemetry for authentication metrics (SC-001, SC-002, SC-004 monitoring)",
+      "state": "New",
+      "description": "Add Application Insights telemetry for authentication metrics (SC-001, SC-002, SC-004 monitoring)",
+      "parent": 3211,
+      "tags": [
+        "Speckit",
+        "US0"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3164": {
+      "id": 3164,
+      "type": "Task",
+      "title": "T061: Implement avatar fallback using user initials if Microsoft Graph photo fetch fails (per research.md)",
+      "state": "New",
+      "description": "Implement avatar fallback using user initials if Microsoft Graph photo fetch fails (per research.md)",
+      "parent": 3211,
+      "tags": [
+        "Speckit",
+        "US0"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3165": {
+      "id": 3165,
+      "type": "Task",
+      "title": "T062: Add security headers to backend responses (Content-Security-Policy, X-Frame-Options, etc.)",
+      "state": "New",
+      "description": "Add security headers to backend responses (Content-Security-Policy, X-Frame-Options, etc.)",
+      "parent": 3211,
+      "tags": [
+        "Speckit",
+        "US0"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3166": {
+      "id": 3166,
+      "type": "Task",
+      "title": "T063: Optimize token validation performance - cache Entra ID public keys",
+      "state": "New",
+      "description": "Optimize token validation performance - cache Entra ID public keys",
+      "parent": 3211,
+      "tags": [
+        "Speckit",
+        "US0"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3167": {
+      "id": 3167,
+      "type": "Task",
+      "title": "T064: Run complete quickstart.md validation end-to-end (Steps 1-7)",
+      "state": "New",
+      "description": "Run complete quickstart.md validation end-to-end (Steps 1-7)",
+      "parent": 3211,
+      "tags": [
+        "Speckit",
+        "US0"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3168": {
+      "id": 3168,
+      "type": "Task",
+      "title": "T065: Code review and refactoring for security best practices",
+      "state": "New",
+      "description": "Code review and refactoring for security best practices",
+      "parent": 3211,
+      "tags": [
+        "Speckit",
+        "US0"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3169": {
+      "id": 3169,
+      "type": "Task",
+      "title": "T066: Update API documentation (Swagger) with authentication examples",
+      "state": "New",
+      "description": "Update API documentation (Swagger) with authentication examples",
+      "parent": 3211,
+      "tags": [
+        "Speckit",
+        "US0"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3170": {
+      "id": 3170,
+      "type": "Task",
+      "title": "T067: Verify all success criteria from spec.md (SC-001 through SC-006)",
+      "state": "New",
+      "description": "Verify all success criteria from spec.md (SC-001 through SC-006)",
+      "parent": 3211,
+      "tags": [
+        "Speckit",
+        "US0"
+      ],
+      "syncedAt": "2026-01-20T19:58:01Z"
+    },
+    "3211": {
+      "id": 3211,
+      "type": "User Story",
+      "title": "Foundational Setup for System Operations",
+      "state": "New",
+      "description": "The system requires foundational infrastructure, configuration, and environment preparation to support all upcoming functionality. This includes establishing the project structure, initializing required services, configuring authentication and access, and ensuring that the application can reliably run and interact with its dependencies before any user-facing features are implemented.",
+      "parent": 3058,
+      "children": [
+        3103,
+        3104,
+        3106,
+        3107,
+        3108,
+        3109,
+        3110,
+        3111,
+        3112,
+        3113,
+        3114,
+        3115,
+        3116,
+        3163,
+        3164,
+        3165,
+        3166,
+        3167,
+        3168,
+        3169,
+        3170
+      ],
+      "tags": [
+        "Speckit"
+      ],
+      "syncedAt": "2026-01-20T22:45:24.794094Z",
+      "createdBy": "Speckit"
     }
   },
   "features": {
@@ -22,9 +1039,188 @@
   },
   "changelog": [
     {
-      "timestamp": "2026-01-20T23:28:15.928213Z",
+      "timestamp": "2026-01-20T18:41:15Z",
+      "operation": "push",
+      "workItems": [
+        3058,
+        3067,
+        3068,
+        3069
+      ],
+      "action": "Updated work items with restructured field content per Spec-Kit governance model",
+      "details": "Feature description enriched with full spec content; User Stories updated with separated descriptions and acceptance criteria"
+    },
+    {
+      "timestamp": "2026-01-20T19:58:01Z",
+      "operation": "push",
+      "workItems": [
+        3103,
+        3104,
+        3106,
+        3107,
+        3108,
+        3109,
+        3110,
+        3111,
+        3112,
+        3113,
+        3114,
+        3115,
+        3116,
+        3117,
+        3118,
+        3119,
+        3120,
+        3121,
+        3122,
+        3123,
+        3124,
+        3125,
+        3126,
+        3127,
+        3128,
+        3129,
+        3130,
+        3131,
+        3132,
+        3133,
+        3134,
+        3135,
+        3136,
+        3137,
+        3138,
+        3139,
+        3140,
+        3141,
+        3142,
+        3143,
+        3144,
+        3145,
+        3146,
+        3147,
+        3148,
+        3149,
+        3150,
+        3151,
+        3152,
+        3153,
+        3154,
+        3155,
+        3156,
+        3157,
+        3158,
+        3159,
+        3160,
+        3161,
+        3162,
+        3163,
+        3164,
+        3165,
+        3166,
+        3167,
+        3168,
+        3169,
+        3170
+      ],
+      "action": "Created 67 Task work items from tasks.md for User Authentication feature",
+      "details": "US0: 21 tasks, US1: 21 tasks, US2: 10 tasks, US3: 15 tasks"
+    },
+    {
+      "timestamp": "2026-01-20T22:41:53.712458Z",
+      "action": "create",
+      "workItemId": 3211,
+      "workItemType": "User Story",
+      "title": "Foundational Setup for System Operations",
+      "changes": {
+        "created": true,
+        "linkedToParent": 3058,
+        "linkedToChildren": [
+          3103,
+          3104,
+          3106,
+          3107,
+          3108,
+          3109,
+          3110,
+          3111,
+          3112,
+          3113,
+          3114,
+          3115,
+          3116
+        ]
+      },
+      "note": "Created User Story 0 and relinked 13 US0 tasks from Feature 3058 to User Story 3211"
+    },
+    {
+      "timestamp": "2026-01-20T22:42:06.408873Z",
+      "action": "create",
+      "workItemId": 3211,
+      "workItemType": "User Story",
+      "title": "Foundational Setup for System Operations",
+      "changes": {
+        "created": true,
+        "linkedToParent": 3058,
+        "linkedToChildren": [
+          3103,
+          3104,
+          3106,
+          3107,
+          3108,
+          3109,
+          3110,
+          3111,
+          3112,
+          3113,
+          3114,
+          3115,
+          3116
+        ]
+      },
+      "note": "Created User Story 0 and relinked 13 US0 tasks from Feature 3058 to User Story 3211"
+    },
+    {
+      "timestamp": "2026-01-20T22:45:24.794152Z",
+      "action": "create",
+      "workItemId": 3211,
+      "workItemType": "User Story",
+      "title": "Foundational Setup for System Operations",
+      "changes": {
+        "created": true,
+        "linkedToParent": 3058,
+        "linkedToChildren": [
+          3103,
+          3104,
+          3106,
+          3107,
+          3108,
+          3109,
+          3110,
+          3111,
+          3112,
+          3113,
+          3114,
+          3115,
+          3116,
+          3163,
+          3164,
+          3165,
+          3166,
+          3167,
+          3168,
+          3169,
+          3170
+        ]
+      },
+      "note": "Created User Story 0 and relinked 21 US0 tasks (T001-T013, T060-T067) from Feature 3058 to User Story 3211"
+    },
+    {
+      "timestamp": "2026-01-21T02:24:13.423668Z",
       "action": "migrate",
-      "note": "Migrated from monolithic mirror to per-feature architecture. Split into 1 feature mirrors."
+      "note": "Migrated Feature 2734 (001-blob-copy) with 92 work items to per-feature mirror."
     }
-  ]
+  ],
+  "features": {
+    "2734": "001-blob-copy"
+  }
 }
