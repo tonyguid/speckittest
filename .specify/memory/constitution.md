@@ -98,8 +98,8 @@ Features MUST be broken into independently testable user stories with clear prio
 ## Development Workflow
 
 ### Specification Lifecycle
-1. **Clarify**: Use `/speckit.clarify` to resolve ambiguities with stakeholders
-2. **Specify**: Use `/speckit.specify` to create spec.md from requirements
+1. **Specify**: Use `/speckit.specify` to create spec.md from requirements
+2. **Clarify**: Use `/speckit.clarify` to resolve ambiguities with stakeholders
 3. **Plan**: Use `/speckit.plan` to define architecture and data models
 4. **Tasks**: Use `/speckit.tasks` to generate granular task breakdown
 5. **Analyze**: Use `/speckit.analyze` to validate cross-artifact consistency
