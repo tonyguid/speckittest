@@ -76,9 +76,10 @@ You MUST use Entra ID via Azure DevOps MCP server. Do NOT use PATs or store secr
    - Existing items have `ADO ID` field (work item ID in ADO)
    - New items do NOT have `ADO ID` field yet
    - update local mirror file:
-        - if the the task is marked complete in spec-kit:
+        - if the task is marked complete in spec-kit (has "Completed" tag):
             - Change the State field to Closed
             - Add a comment noting the change with timestamp
+   - **Sync task states**: Run `python scripts/sync-task-states.py` to sync completed task states to ADO
 
 3. **For existing work items**:
    <!--- Compare each work item to its relevant Feature/User Story/Task to determine if they need to be updated
