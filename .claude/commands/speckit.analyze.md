@@ -1,6 +1,6 @@
 ---
-description: Perform a non-destructive cross-artifact consistency and quality analysis across spec.md, plan.md, and tasks.md after task generation.
-handoffs: 
+description: "Analyze specification artifacts for consistency, coverage, and quality issues"
+handoffs:
   - label: Update ADO
     agent: speckit.ado
     prompt: push
