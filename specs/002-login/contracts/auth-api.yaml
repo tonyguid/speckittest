@@ -1,0 +1,346 @@
+openapi: 3.0.3
+info:
+  title: Blob Copy - Authentication API
+  description: |
+    Authentication endpoints for Microsoft Entra ID (Azure AD) integration.
+    Implements OAuth 2.0 authorization code flow with PKCE for secure user authentication.
+  version: 1.0.0
+  contact:
+    name: Blob Copy Team
+
+servers:
+  - url: https://localhost:5001
+    description: Local development
+  - url: https://api.blobcopy.example.com
+    description: Production
+
+tags:
+  - name: Authentication
+    description: User authentication and session management
+
+paths:
+  /auth/login:
+    get:
+      summary: Initiate Entra ID login
+      description: |
+        Redirects the user to Microsoft Entra ID login page to begin OAuth 2.0 authorization code flow.
+        Implements PKCE (Proof Key for Code Exchange) for security.
+
+        **Source Requirements**: FR-002, FR-003
+      tags:
+        - Authentication
+      parameters:
+        - name: returnUrl
+          in: query
+          description: URL to redirect to after successful authentication
+          required: false
+          schema:
+            type: string
+            default: /blob-copy
+          example: /blob-copy
+      responses:
+        '302':
+          description: Redirect to Entra ID login page
+          headers:
+            Location:
+              description: Entra ID authorization URL
+              schema:
+                type: string
+              example: https://login.microsoftonline.com/{tenant}/oauth2/v2.0/authorize?client_id=...
+        '400':
+          description: Invalid returnUrl parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/callback:
+    get:
+      summary: OAuth callback handler
+      description: |
+        Handles the OAuth callback from Entra ID after user authentication.
+        Exchanges the authorization code for access and refresh tokens.
+        Creates user session and sets HttpOnly cookie for refresh token.
+
+        **Source Requirements**: FR-004, FR-005, FR-006, FR-015, NFR-003
+      tags:
+        - Authentication
+      parameters:
+        - name: code
+          in: query
+          description: Authorization code from Entra ID
+          required: true
+          schema:
+            type: string
+        - name: state
+          in: query
+          description: CSRF protection state parameter
+          required: true
+          schema:
+            type: string
+        - name: error
+          in: query
+          description: Error code if authentication failed
+          required: false
+          schema:
+            type: string
+        - name: error_description
+          in: query
+          description: Human-readable error description
+          required: false
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Successful authentication, redirect to returnUrl
+          headers:
+            Location:
+              description: Return URL (default: /blob-copy)
+              schema:
+                type: string
+            Set-Cookie:
+              description: HttpOnly refresh token cookie
+              schema:
+                type: string
+                example: refresh_token=eyJ...; HttpOnly; Secure; SameSite=Strict; Path=/auth/refresh; Max-Age=7776000
+        '200':
+          description: Authentication result (used for SPA redirect)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationSuccessResponse'
+        '400':
+          description: Authentication failed or invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationErrorResponse'
+        '403':
+          description: CSRF state parameter mismatch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: CSRF_DETECTED
+                message: Invalid request. Please start sign-in again.
+
+  /auth/refresh:
+    post:
+      summary: Refresh access token
+      description: |
+        Exchanges a refresh token (from HttpOnly cookie) for a new access token.
+        Automatically triggered by frontend when access token is about to expire.
+
+        **Source Requirements**: FR-009, SC-004
+        **Performance Target**: <200ms p95 latency
+      tags:
+        - Authentication
+      security:
+        - refreshTokenCookie: []
+      responses:
+        '200':
+          description: New access token issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshTokenResponse'
+        '401':
+          description: Refresh token missing, expired, or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: REFRESH_TOKEN_INVALID
+                message: Your session has expired. Please sign in again.
+
+  /auth/logout:
+    post:
+      summary: Logout user
+      description: |
+        Terminates the user's session by clearing all tokens and cookies.
+        Redirects user to login page after logout.
+
+        **Source Requirements**: FR-010, FR-011, SC-005
+        **Performance Target**: <2 seconds
+      tags:
+        - Authentication
+      security:
+        - bearerAuth: []
+      responses:
+        '302':
+          description: Logout successful, redirect to login page
+          headers:
+            Location:
+              description: Login page URL
+              schema:
+                type: string
+                example: /login
+            Set-Cookie:
+              description: Clear refresh token cookie
+              schema:
+                type: string
+                example: refresh_token=; HttpOnly; Secure; SameSite=Strict; Path=/auth/refresh; Max-Age=0
+        '200':
+          description: Logout successful (for SPA)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Logout successful
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token from Entra ID
+
+    refreshTokenCookie:
+      type: apiKey
+      in: cookie
+      name: refresh_token
+      description: HttpOnly cookie containing refresh token
+
+  schemas:
+    AuthenticationSuccessResponse:
+      type: object
+      required:
+        - success
+        - userSession
+        - accessToken
+        - expiresIn
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+          description: Authentication success indicator
+        userSession:
+          $ref: '#/components/schemas/UserSession'
+        accessToken:
+          type: string
+          description: JWT access token
+          example: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+        expiresIn:
+          type: integer
+          description: Access token lifetime in seconds
+          example: 3600
+        tokenType:
+          type: string
+          enum: [Bearer]
+          example: Bearer
+
+    UserSession:
+      type: object
+      required:
+        - userId
+        - name
+        - email
+        - accessTokenExpiration
+        - isAuthenticated
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: User's unique identifier (OID claim from Entra ID)
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+        name:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: User's full display name
+          example: John Doe
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: john.doe@example.com
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+          description: URL to user's profile photo (from Microsoft Graph)
+          example: https://graph.microsoft.com/v1.0/users/{userId}/photo/$value
+        accessTokenExpiration:
+          type: string
+          format: date-time
+          description: When the access token expires (ISO 8601)
+          example: 2026-01-20T19:30:00Z
+        isAuthenticated:
+          type: boolean
+          description: Whether user is currently authenticated
+          example: true
+
+    RefreshTokenResponse:
+      type: object
+      required:
+        - accessToken
+        - expiresIn
+        - tokenType
+      properties:
+        accessToken:
+          type: string
+          description: New JWT access token
+          example: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+        expiresIn:
+          type: integer
+          description: Access token lifetime in seconds
+          example: 3600
+        tokenType:
+          type: string
+          enum: [Bearer]
+          example: Bearer
+
+    AuthenticationErrorResponse:
+      type: object
+      required:
+        - success
+        - errorCode
+        - errorMessage
+      properties:
+        success:
+          type: boolean
+          enum: [false]
+          description: Authentication failure indicator
+        errorCode:
+          type: string
+          description: Machine-readable error code
+          enum:
+            - INTERACTION_REQUIRED
+            - USER_CANCELLED
+            - INVALID_SCOPE
+            - MFA_REQUIRED
+            - NETWORK_ERROR
+            - TOKEN_EXCHANGE_FAILED
+            - CSRF_DETECTED
+          example: USER_CANCELLED
+        errorMessage:
+          type: string
+          description: User-friendly error message
+          example: Sign-in was cancelled. Please try again.
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: INVALID_REQUEST
+        message:
+          type: string
+          description: Error description
+          example: Required parameter 'code' is missing

@@ -1,0 +1,20 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "EntraId": {
+    "TenantId": "YOUR_TENANT_ID_HERE",
+    "ClientId": "YOUR_CLIENT_ID_HERE",
+    "ClientSecret": "YOUR_CLIENT_SECRET_HERE",
+    "RedirectUri": "https://localhost:5001/auth/callback",
+    "Scopes": ["User.Read", "offline_access"]
+  },
+  "Jwt": {
+    "Authority": "https://login.microsoftonline.com/YOUR_TENANT_ID_HERE",
+    "Audience": "YOUR_CLIENT_ID_HERE",
+    "ValidIssuer": "https://login.microsoftonline.com/YOUR_TENANT_ID_HERE/v2.0"
+  }
+}

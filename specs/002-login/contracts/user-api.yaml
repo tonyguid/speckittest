@@ -1,0 +1,128 @@
+openapi: 3.0.3
+info:
+  title: Blob Copy - User API
+  description: |
+    User profile endpoints for authenticated users.
+    Provides access to user information extracted from Entra ID tokens.
+  version: 1.0.0
+  contact:
+    name: Blob Copy Team
+
+servers:
+  - url: https://localhost:5001
+    description: Local development
+  - url: https://api.blobcopy.example.com
+    description: Production
+
+tags:
+  - name: User Profile
+    description: User information and profile management
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/user/me:
+    get:
+      summary: Get current user profile
+      description: |
+        Returns the authenticated user's profile information including name, email, and avatar.
+        This endpoint extracts data from the JWT access token claims and optionally fetches
+        the user's profile photo from Microsoft Graph API.
+
+        **Source Requirements**: FR-007
+        **Performance Target**: <100ms p95 latency (excluding avatar fetch)
+      tags:
+        - User Profile
+      parameters:
+        - name: includeAvatar
+          in: query
+          description: Whether to fetch user's profile photo from Microsoft Graph
+          required: false
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Not authenticated or token invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Failed to fetch avatar from Microsoft Graph (profile still returned without avatar)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token from Entra ID (obtained via /auth/callback or /auth/refresh)
+
+  schemas:
+    UserProfile:
+      type: object
+      required:
+        - userId
+        - name
+        - email
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: User's unique identifier (OID claim from JWT)
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+        name:
+          type: string
+          description: User's full display name (name claim from JWT)
+          example: John Doe
+        email:
+          type: string
+          format: email
+          description: User's email address (email or preferred_username claim from JWT)
+          example: john.doe@example.com
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+          description: |
+            URL to user's profile photo. Fetched from Microsoft Graph API if includeAvatar=true.
+            Returns null if user has no photo or Graph API call fails.
+          example: https://graph.microsoft.com/v1.0/users/a1b2c3d4-e5f6-7890-abcd-ef1234567890/photo/$value
+        initials:
+          type: string
+          description: User's initials (derived from name) for fallback avatar display
+          example: JD
+          maxLength: 3
+        roles:
+          type: array
+          items:
+            type: string
+          description: User's roles (from JWT roles claim). Currently unused but included for future RBAC.
+          example: []
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: UNAUTHORIZED
+        message:
+          type: string
+          description: Error description
+          example: Access token is missing or invalid
